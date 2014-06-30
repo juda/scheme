@@ -60,7 +60,21 @@ def calc(statement,mapping):
     else:
         statement=decompose(statement[1:-1])
         if statement[0]=='define':
-            mapping.addvar(statement[1],calc(statement[2],mapping))
+            if statement[1][0]!='(':
+                mapping.addvar(statement[1],calc(statement[2],mapping))
+            else:
+                pass
+        elif statement[0]=='if':
+            if calc(statement[1]):
+                calc(statement[2],mapping)
+            else:
+                calc(statement[3],mapping)
+        elif statement[0]=='set!':
+            mapping.addvar(statement[1],statement[2])
+        elif statement[0]=='lambda':
+            pass
+        else:
+            mapping.env[statement[0]](statement[1:])
 
 class global_Env():
     env={}
