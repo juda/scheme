@@ -14,17 +14,16 @@ def parentheseBalance(statement):
 
 while True:
     statement=''
-    tab=''
+    isline=True
     while True:
-        if tab=='':
+        if isline:
             statement+=raw_input('> ')
         else:
-            statement+=' '
-            statement+=raw_input(tab)
+            statement+=raw_input('  ')
         if parentheseBalance(statement):
             break
         else:
-            tab+='\t'
+            isline=False
     if statement=='exit':
         exit(0)
     else:
