@@ -20,7 +20,7 @@ class fun_dict:
     def diff_operator(self,exp):
         return lambda *s:reduce(lambda x,y:exp(x,eval(process(y))),s[1:],eval(process(s[0])))
     def compare_expression(self,exp):
-        def clousure(*parms):
+        def clousure(parms):
             leng=len(parms)
             x=eval(process(parms[i]))
             for i in range(1,leng):
@@ -32,12 +32,12 @@ class fun_dict:
         return clousure
     
     def __init__(self):
-        env.update(vars(math))
-        env.update(
-            {'+':self.deff_operator(op.add),
-             '-':self.deff_operator(op.sub),
-             '*':self.deff_operator(op.mul),
-             '/':self.deff_operator(op.div),
+        self.env.update(vars(math))
+        self.env.update(
+            {'+':self.diff_operator(op.add),
+             '-':self.diff_operator(op.sub),
+             '*':self.diff_operator(op.mul),
+             '/':self.diff_operator(op.div),
              'not':op.not_,
              '>':self.compare_expression(op.gt),
              '<':self.compare_expression(op.lt),
@@ -68,7 +68,7 @@ class fun_dict:
 class name_dict():
     num=0
     env={}
-    def __init__(self,father=self):
+    def __init__(self,father=0):
         self.father=father
     def add(self,name):
         if name not in self.env:
