@@ -5,8 +5,9 @@ import operator as op
 import math
 from process import process
 
-class fun_dict:
-    env={}
+class mydict:
+    fun_env={}
+    name_env={}
     def cons(self,x,y):
         if isinstance(y,list):
             return [x]+y
@@ -30,10 +31,14 @@ class fun_dict:
                 x=y
             return True
         return clousure
-    
-    def __init__(self):
-        self.env.update(vars(math))
-        self.env.update(
+    def if_expression(self,cond,exp1,exp2=None):
+        if eval(process(cond,self)):
+            pass
+                
+    def __init__(self,father=None):
+        self.father=father
+        my.fun_env.update(vars(math))
+        my.fun_env.update(
             {'+':self.diff_operator(op.add),
              '-':self.diff_operator(op.sub),
              '*':self.diff_operator(op.mul),
@@ -54,27 +59,25 @@ class fun_dict:
              'list':lambda *x:list(x),
              'list?':lambda x:isinstance(x,list),
              'null?':lambda x:x==[],
-             'symbol?':lambda x:isinstance(x,str)
+             'symbol?':lambda x:isinstance(x,str),
+             'if':self.if_expression
              })
-    def find(self,name):
-        if name in self.env:
-            return self.env[name]
+    def find_fun(self,name):
+        if name in self.fun_env:
+            return self.fun_env[name]
         else:
             raise NameError("Can't find this function")
-    def add(self,name,exp):
-        self.env[name]=exp
-
-
-class name_dict():
-    num=0
-    env={}
-    def __init__(self,father=0):
-        self.father=father
-    def add(self,name):
-        if name not in self.env:
+    def add_fun(self,name,exp):
+        self.fun_env[name]=exp
+    def add_name(self,name):
+        if name.lower() not in self.env:
             num+=1
-            self.env[name]='fun%d'%(num,)
-    def exist(self,name):
-        return name in self.env
-    def find(self,name):
-        return self.env[name]
+            self.env[name.lower()]='fun%d'%(num,)
+    def find_name(self,name):
+        if name.lower() in self.env:
+            return self.name_env[name.lower()]
+        elif self.father==None:
+            raise NameError("Can't find this variable")
+        else:
+            return self.father.find_name(name)
+
