@@ -1,3 +1,5 @@
+#-*-coding:utf8-*-
+
 def tokenize(statement):
     return statement.replace('(',' ( ').replace(')',' ) ').split()
 
@@ -29,6 +31,11 @@ def parse_recursion(token):
     return res
 
 def parse(statement):
+    '''
+    对一个语句进行分词，结果返回分词后的字符流
+    >>> parse("(define (x y) (+ y 3))")
+    ['define', ['x', 'y'], ['+', 'y', '3']]
+    '''
     token=tokenize(statement)
     #print token
     return parse_recursion(token)

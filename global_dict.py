@@ -1,6 +1,9 @@
+#-*-coding:utf8-*-
+
 ######### global_dict class
 import operator as op
 import math
+from process import process
 
 class fun_dict:
     env={}
@@ -14,21 +17,35 @@ class fun_dict:
             return x+y
         else:
             return x+[y]
+    def diff_operator(self,exp):
+        return lambda *s:reduce(lambda x,y:exp(x,eval(process(y))),s[1:],eval(process(s[0])))
+    def compare_expression(self,exp):
+        def clousure(*parms):
+            leng=len(parms)
+            x=eval(process(parms[i]))
+            for i in range(1,leng):
+                y=eval(process(parms[i]))
+                if not exp(x,y):
+                    return False
+                x=y
+            return True
+        return clousure
+    
     def __init__(self):
         env.update(vars(math))
         env.update(
-            {'+':op.add,
-             '-':op.sub,
-             '*':op.mul,
-             '/':op/div,
+            {'+':self.deff_operator(op.add),
+             '-':self.deff_operator(op.sub),
+             '*':self.deff_operator(op.mul),
+             '/':self.deff_operator(op.div),
              'not':op.not_,
-             '>':op.gt,
-             '<':op.lt,
-             '>=':op.ge,
-             '<=':op.le,
-             '=':op.eq,
-             'equal?':op.eq,
-             'eq?':op.is_,
+             '>':self.compare_expression(op.gt),
+             '<':self.compare_expression(op.lt),
+             '>=':self.compare_expression(op.ge),
+             '<=':self.compare_expression(op.le),
+             '=':self.compare_expression(op.eq),
+             'equal?':self.compare_expression(op.eq),
+             'eq?':self.compare_expression(op.is_),
              'length':len,
              'cons':self.cons,
              'car':lambda x:x[0],
