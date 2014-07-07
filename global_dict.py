@@ -6,8 +6,7 @@ import math
 from process import process
 
 class mydict:
-    fun_env={}
-    name_env={}
+    env={}
     def cons(self,x,y):
         if isinstance(y,list):
             return [x]+y
@@ -62,22 +61,14 @@ class mydict:
              'symbol?':lambda x:isinstance(x,str),
              'if':self.if_expression
              })
-    def find_fun(self,name):
-        if name in self.fun_env:
-            return self.fun_env[name]
-        else:
-            raise NameError("Can't find this function")
-    def add_fun(self,name,exp):
-        self.fun_env[name]=exp
-    def add_name(self,name):
-        if name.lower() not in self.env:
-            num+=1
-            self.env[name.lower()]='fun%d'%(num,)
+
+    def add_name(self,name,exp):
+        self.env[name.lower()]=exp
     def find_name(self,name):
         if name.lower() in self.env:
-            return self.name_env[name.lower()]
+            return self.env[name.lower()]
         elif self.father==None:
-            raise NameError("Can't find this variable")
+            return False
         else:
             return self.father.find_name(name)
 

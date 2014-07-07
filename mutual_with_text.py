@@ -1,4 +1,4 @@
-'''read from text'''
+'''mutual with text'''
 
 def parentheseBalance(statement):
     res=0
@@ -27,3 +27,9 @@ def transnumber(number):
         return int(number)
     except ValueError:
         return float(number)
+
+def tostring(exp):
+    if isinstance(exp,list):
+        return '('+' '.join(map(str,exp))+')'
+    else:
+        return str(exp)
