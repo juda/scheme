@@ -29,9 +29,12 @@ def repl():
                 else:
                     print global_env.env[statement]
             else:
+                #try:
                 val=process(parse(statement),global_env)
                 if val is not None:
                     print tostring(val)
+                #except Exception as err:
+                    #print "[error]%s"%(err,)
         
 if __name__=="__main__":
     repl()

@@ -5,6 +5,7 @@ import operator as op
 import re
 
 def selfEvaluating(exp):
+    #print exp[0]
     return (isnumber(exp[0]) or isQuoted(exp[0]))
 
 def isVariable(exp,env):
@@ -29,8 +30,10 @@ def evalDefinition(exp,env):
 
 def evalIf(exp,env):
     if process(exp[1],env):
+        #print 't'
         return process(exp[2],env)
     else:
+        #print 'f'
         return process(exp[3],env)
 
 def makeProcedure(para,body):
@@ -65,7 +68,7 @@ def applyPrimitiveFunction(foo,agruments):
     if foo=='+':
         return reduce(op.add,agruments,0)
     elif foo=='-':
-        return reduce(op.sub,agruments[1:],agruments[0])
+        return reduce(op.sub,agruments,0)
     elif foo=='*':
         return reduce(op.mul,agruments,1)
     elif foo=='/':
@@ -117,28 +120,38 @@ def applyPrimitiveFunction(foo,agruments):
         raise NameError("Doesn't exist or lock of implementation this primitive procedure %s"%(foo,))
 
 
+def preProcess(exp,env):
+    if isinstance(exp,list):
+        return process(exp,env)
+    else:
+        return exp
+
 def applyPrimitiveProcedure(body,env):
+    #print 'noe',body
     foo=body[0]
-    parameters=map(lambda x:process(x,env),body[1:])
-    #print parameters
+    parameters=map(lambda x:preProcess(x,env),body[1:])
+    #print 'aaa'
     agruments=[]
     for i in parameters:
         if isVariable(i,env):
             agruments.append(transnumber(env.findVariable(i)))
         elif isnumber(i):
             agruments.append(transnumber(i))
+    #print foo,agruments
     return applyPrimitiveFunction(foo,agruments)
 
 def applyFunction(exp,env):
+    #print exp
     if isinstance(exp[0],list):
         foo=process(exp[0],env)
     else:
                 try:
+                        #print 'hea'
                         return applyPrimitiveProcedure(exp,env)
-                except NameError:
+                except Exception:
                         foo=env.findProcedure(exp[0])
     body,parameters=foo
-    #print foo
+    #print body,parameters
     agruments=exp[1:]
     if len(parameters)!=len(agruments):
         raise SyntaxError("Can't match the agruments and parameters")
@@ -150,6 +163,7 @@ def applyFunction(exp,env):
     if env.findProcedure(body[0]):
         return applyPrimitiveProcedure(body,env)
     else:
+        #print 'here'
         return process(body,local_env)
 
 def process(exp,env):
@@ -160,7 +174,7 @@ def process(exp,env):
     elif isQuoted(exp[0]):
         return exp[0]
     elif exp[0]=='set!':
-        revalAssignment(exp,env)
+        evalAssignment(exp,env)
     elif exp[0]=='define':
         evalDefinition(exp,env)
     elif exp[0]=='if':

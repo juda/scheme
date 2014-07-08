@@ -44,4 +44,4 @@ class mydict:
                 return
             else:
                 w=w.father
-        raise NameError("Don't Exist the variable %s"%(name,))
+        raise NameError("Doesn't Exist the variable %s"%(name,))
