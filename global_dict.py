@@ -2,6 +2,7 @@
 
 ######### global_dict class
 import operator as op
+from mutual_with_text import *
 import math
 from process import process
 
@@ -11,23 +12,32 @@ class mydict:
         self.procedure={}
         self.variable={}
 
-    def addLambda(body,para):
-        self.procedure[body]=para
-
-    def addVariable(name,value):
-        self.variable[name]=value
-
-    def findVariable(name):
-        w=self
+    def findProcedure(name):
+        w-self.procedure
         while w!=None:
             if name in w:
                 return w[name]
             else:
                 w=w.father
-        raise NameError("Don't Exist the variable %d"%(name,))
+        raise NameError("Doesn't exist the procedure %d"%(name,))
+
+    def addVariable(name,value):
+        self.variable[name]=value
+
+    def findVariable(name):
+        w=self.variable
+        while w!=None:
+            if name in w:
+                if isnumber(w[name]):
+                    return w[name]
+                else:
+                    return self.findVariable(w[name])
+            else:
+                w=w.father
+        raise NameError("Doesn't Exist the variable %d"%(name,))
 
     def setVariable(name,value):
-        w=self
+        w=self.variable
         while w!=None:
             if name in w:
                 w[name]=value

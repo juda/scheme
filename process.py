@@ -1,6 +1,8 @@
 #-*-coding:utf8-*-
-from global_dict import mydict,PrimitiveProcedure
+from global_dict import mydict
 from mutual_with_text import *
+import operator as op
+import re
 
 def selfEvaluatiing(exp):
 	return isnumber(exp) or isQuoted(exp)
@@ -12,8 +14,7 @@ def isQuoted(exp):
 	return exp[0]=='"' and exp[-1]=='"'
 
 def lookupVariableValue(exp,env):
-	env.findVariable(exp)
-
+	return env.findVariable(exp)
 
 def evalAssignment(exp,env):
 	env.setVariable(exp[1],exp[2])
@@ -21,7 +22,7 @@ def evalAssignment(exp,env):
 
 def evalDefinition(exp,env):
 	if isinstance(exp[1],list):
-		makeProcedure(exp[1:][1:],exp[2],env)
+		env.procedure[exp[1][0]]=makeProcedure(exp[1:][1:],exp[2])
 	else:
 		env.addVariable(exp[1],process(exp[2]))
 
@@ -31,8 +32,8 @@ def evalIf(exp,env):
 	else:
 		return process(exp[3],env)
 
-def makeProcedure(para,body,env):
-	env.addLambda(body,para)
+def makeProcedure(para,body):
+	return (body,para)
 
 def evalSequence(exp,env):
 	if len(exp)==1:
@@ -42,52 +43,106 @@ def evalSequence(exp,env):
 		return evalSequence(exp[1:],env)
 
 def condIf(exp,env):
-	'''
-	wating for completing
-	'''
-	pass
+	for i in exp[1:]:
+		if i[0]=='else':
+			return process(i[1],env)
+		else:
+			if process(i[0],env):
+				return process(i[1],env)
 
-def isPrimitiveProcedure(procedure):
-	for i in procedure:
-		if isinstance(i,list):
-			return False
-	return procedure[0] in PrimitiveProcedure
-
-def applyPrimitiveProcedure(procedure,agruments):
-	pass
-
-def procedureBody(procedure):
-	pass
-
-def extendEnvironment(para,agruments,env):
-	pass
-
-def procedureEnvironment(procedure):
-	pass
-
-def applyFunction(procedure,agruments):
-	if isPrimitiveProcedure(procedure):
-		return applyPrimitiveProcedure(procedure,agruments)
+def catch(command,alist):
+	if command=='':
+		return alist
+	elif command[-1]=='a':
+		return catch(command[:-1],alist[0])
 	else:
-		return evalSequence(procedureBody(procedure),(extendEnvironment(proecedureParameters(procedure),agruments,procedureEnvironment(procedure))))
+		return catch(command[:-1],alist[1:])
 
-def evalOperator(exp):
-	'''
-	wating for completing
-	'''
-	pass
+def applyPrimitiveFunction(foo,agruments):
+	pattern=re.compile(r'c[a|d]+r')
+	if foo=='+':
+		return reduce(op.add,agruments,0)
+	elif foo=='-':
+		return reduce(op.sub,agruments[1:],agruments[0])
+	elif foo=='*':
+		return reduce(op.mul,agruments,1)
+	elif foo=='/':
+		return reduce(op.div,agruments[1:],agruments[0])
+	elif foo=='not':
+		return not agruments[0]
+	elif foo=='>':
+		return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
+	elif foo=='<':
+		return reduce(op.and_,map(op.lt,agruments[:-1],agruments[1:]),True)
+	elif foo=='>=':
+		return reduce(op.and_,map(op.ge,agruments[:-1],agruments[1:]),True)
+	elif foo=='<=':
+		return reduce(op.and_,map(op.le,agruments[:-1],agruments[1:]),True)
+	elif foo=='=' or foo=='equal?':
+		return reduce(op.and_,map(op.eq,agruments[:-1],agruments[1:]),True)
+	elif foo=='eq?':
+		return reduce(op.and_,map(op.is_,agruments[:-1],agruments[1:]),True)
+	elif foo=='length':
+		return len(agruments)
+	elif foo=='and':
+		return reduce(op.and_,map(op.and_,agruments[:-1],agruments[1:]),True)
+	elif foo=='or':
+		return reduce(op.and_,map(op.or_,agruments[:-1],agruments[1:]),True)
+	elif foo=='cons':
+		if len(agruments)!=2:
+			raise SyntaxError("the number of parameters of cons is uncorrect")
+		if isinstance(agruments[1],list):
+			return [agruments[0]]+agruments[1]
+		else:
+			return agruments
+	elif foo=='list':
+		return agruments
+	elif foo=='list?':
+		return len(agruments)==1 and isinstance(agruments[0],list)
+	elif foo=='null?':
+		return agruments==[]
+	elif foo=='symbol?':
+		return len(agruments)==1 and isinstance(agruments[0],str)
+	elif foo=='display':
+		print tostring(agruments[0])
+	elif foo=='newline':
+		print
+	elif foo==foo[pattern.match(foo).start():pattern.match(foo).end()]:
+		if not (isinstance(agruments[0],list) and len(agruments)==1):
+			raise SyntaxError("error parameters in %d"%(foo,))
+		return catch(foo[1:-1],agruments[0])
+	else:
+		raise NameError("Doesn't exist or lock of implementation this primitive procedure %d"%(foo,))
 
-def listOfValues(exp):
-	'''
-	wating for completing
-	'''
-	pass
 
-def operands(exp):
-	'''
-	wating for completing
-	'''
-	pass
+def applyPrimitiveProcedure(body,env):
+	foo=body[0]
+	parameters=map(lambda x:process(x,env),body[1:])
+	agruments=[]
+	for i in parameters:
+		if isVariable(i):
+			agruments.append(transnumber(env.findVariable(i))
+		if isnumber(i):
+			agruments.append(transnumber(i))
+	return applyPrimitiveFunction(foo,agruments)
+
+def applyFunction(exp,env):
+	if isinstance(exp,list):
+		foo=process(exp[0])
+	else:
+		foo-env.findProcedure(exp[0])
+	body,parameters=foo
+	agruments=exp[1:]
+	if len(parameters)!=len(agruments):
+		raise SyntaxError("Can't match the agruments and parameters")
+	local_env=mydict(env)
+	temp=len(agruments)
+	for i in range(temp):
+		local_env.addVariable(parameters[i],agruments[i])
+	if env.findProcedure(body[0])!=None
+		return applyPrimitiveProcedure(body,env)
+	else:
+		return process(body,local_env)
 
 def process(exp,env):
     if selfEvaluating(exp):
@@ -97,9 +152,9 @@ def process(exp,env):
     elif isQuoted(exp):
     	return exp
     elif exp[0]=='set!':
-    	return evalAssignment(exp,env)
+    	revalAssignment(exp,env)
     elif exp[0]=='define':
-    	return evalDefinition(exp,env)
+    	evalDefinition(exp,env)
     elif exp[0]=='if':
     	return evalIf(exp,env)
     elif exp[0]=='lambda':
@@ -108,7 +163,5 @@ def process(exp,env):
     	return evalSequence(exp[1:],env)
     elif exp[0]=='cond':
     	return condIf(exp,env)
-    elif isApplication(exp):
-    	return applyFunction((process(evalOperator(exp),env)),(listOfValues(operands(exp)),env))
-    else:
-    	raise SyntaxError("unknown expression type -- Eval")
+    else
+    	return applyFunction(exp,env)
