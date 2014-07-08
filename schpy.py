@@ -2,6 +2,7 @@
 from mutual_with_text import *
 from global_dict import *
 from process import process
+from parse import *
 
 def repl():
     '''read-eval-print-loop'''
@@ -28,7 +29,9 @@ def repl():
                 else:
                     print global_env.env[statement]
             else:
-                val=process(parse(statement),env)
+                val=process(parse(statement),global_env)
                 if val is not None:
                     print tostring(val)
         
+if __name__=="__main__":
+    repl()

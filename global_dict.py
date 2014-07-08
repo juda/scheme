@@ -4,44 +4,44 @@
 import operator as op
 from mutual_with_text import *
 import math
-from process import process
 
 class mydict:
+    father=None
+    procedure={}
+    variable={}
     def __init__(self,father=None):
         self.father=father
-        self.procedure={}
-        self.variable={}
 
-    def findProcedure(name):
-        w-self.procedure
+    def findProcedure(self,name):
+        w=self
         while w!=None:
-            if name in w:
-                return w[name]
+            if name in w.procedure:
+                return w.procedure[name]
             else:
                 w=w.father
-        raise NameError("Doesn't exist the procedure %d"%(name,))
+        return False
 
-    def addVariable(name,value):
+    def addVariable(self,name,value):
         self.variable[name]=value
 
-    def findVariable(name):
-        w=self.variable
+    def findVariable(self,name):
+        w=self
         while w!=None:
-            if name in w:
-                if isnumber(w[name]):
-                    return w[name]
+            if name in w.variable:
+                if isnumber(w.variable[name]):
+                    return w.variable[name]
                 else:
-                    return self.findVariable(w[name])
+                    return self.findVariable(w.variable[name])
             else:
                 w=w.father
-        raise NameError("Doesn't Exist the variable %d"%(name,))
+        return False
 
-    def setVariable(name,value):
-        w=self.variable
+    def setVariable(self,name,value):
+        w=self
         while w!=None:
-            if name in w:
-                w[name]=value
+            if name in w.variable:
+                w.variable[name]=value
                 return
             else:
                 w=w.father
-        raise NameError("Don't Exist the variable %d"%(name,))
+        raise NameError("Don't Exist the variable %s"%(name,))
