@@ -1,5 +1,5 @@
 #-*-coding:utf8-*-
-from global_dict import mydict
+from global_dict import mydict,PrimitiveProcedure
 from mutual_with_text import *
 
 def selfEvaluatiing(exp):
@@ -12,70 +12,34 @@ def isQuoted(exp):
 	return exp[0]=='"' and exp[-1]=='"'
 
 def lookupVariableValue(exp,env):
-	'''
-	wating for completing
-	'''
-	pass
+	env.findVariable(exp)
 
-def isAssignment(exp):
-	'''
-	wating for completing
-	'''
-	pass
 
 def evalAssignment(exp,env):
-	'''
-	wating for completing
-	'''
-	pass
+	env.setVariable(exp[1],exp[2])
 
-def isDefinition(exp):
-	'''
-	wating for completing
-	'''
-	pass
 
 def evalDefinition(exp,env):
-	'''
-	wating for completing
-	'''
-	pass
+	if isinstance(exp[1],list):
+		makeProcedure(exp[1:][1:],exp[2],env)
+	else:
+		env.addVariable(exp[1],process(exp[2]))
 
 def evalIf(exp,env):
-	'''
-	wating for completing
-	'''
-	pass
+	if process(exp[1],env):
+		return process(exp[2],env)
+	else:
+		return process(exp[3],env)
 
 def makeProcedure(para,body,env):
-	'''
-	wating for completing
-	'''
-	pass
-
-def lambdaParameters(exp):
-	'''
-	wating for completing
-	'''
-	pass
-
-def lambdaBody(exp):
-	'''
-	wating for completing
-	'''
-	pass
+	env.addLambda(body,para)
 
 def evalSequence(exp,env):
-	'''
-	wating for completing
-	'''
-	pass
-
-def beginActions(exp):
-	'''
-	wating for completing
-	'''
-	pass
+	if len(exp)==1:
+		return process(exp[0],env)
+	else:
+		process(exp[0],env)
+		return evalSequence(exp[1:],env)
 
 def condIf(exp,env):
 	'''
@@ -83,11 +47,29 @@ def condIf(exp,env):
 	'''
 	pass
 
-def applyFunction(exp,para):
-	'''
-	wating for completing
-	'''
+def isPrimitiveProcedure(procedure):
+	for i in procedure:
+		if isinstance(i,list):
+			return False
+	return procedure[0] in PrimitiveProcedure
+
+def applyPrimitiveProcedure(procedure,agruments):
 	pass
+
+def procedureBody(procedure):
+	pass
+
+def extendEnvironment(para,agruments,env):
+	pass
+
+def procedureEnvironment(procedure):
+	pass
+
+def applyFunction(procedure,agruments):
+	if isPrimitiveProcedure(procedure):
+		return applyPrimitiveProcedure(procedure,agruments)
+	else:
+		return evalSequence(procedureBody(procedure),(extendEnvironment(proecedureParameters(procedure),agruments,procedureEnvironment(procedure))))
 
 def evalOperator(exp):
 	'''
@@ -114,16 +96,16 @@ def process(exp,env):
     	return lookupVariableValue(exp,env)
     elif isQuoted(exp):
     	return exp
-    elif isAssignment(exp):
+    elif exp[0]=='set!':
     	return evalAssignment(exp,env)
-    elif isDefinition(exp):
+    elif exp[0]=='define':
     	return evalDefinition(exp,env)
     elif exp[0]=='if':
     	return evalIf(exp,env)
     elif exp[0]=='lambda':
-    	return makeProcedure(lambdaParameters(exp[1]),lambdaBody(exp[2]),env)
+    	return makeProcedure(exp[1],exp[2],env)
     elif exp[0]=='begin':
-    	return evalSequence(beginActions(exp),env)
+    	return evalSequence(exp[1:],env)
     elif exp[0]=='cond':
     	return condIf(exp,env)
     elif isApplication(exp):
