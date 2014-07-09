@@ -10,6 +10,7 @@ Implement a scheme Interpretation
 
 2. http://norvig.com/lispy2.html
 
+<<<<<<< HEAD
 #工作日志
 
 ##2014/7/8
@@ -19,4 +20,6 @@ Implement a scheme Interpretation
 修复了参数为过程时的bug
 
 
+
+=======
 
