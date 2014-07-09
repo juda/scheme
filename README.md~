@@ -2,7 +2,6 @@ scheme
 ======
 
 Implement a scheme Interpretation
----------------------------------
 
 #Reference
 
@@ -10,7 +9,6 @@ Implement a scheme Interpretation
 
 2. http://norvig.com/lispy2.html
 
-<<<<<<< HEAD
 #工作日志
 
 ##2014/7/8

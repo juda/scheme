@@ -68,8 +68,11 @@ def applyPrimitiveFunction(foo,agruments):
     #print foo
     if foo=='+':
            return reduce(op.add,agruments,0)
-    elif foo=='-':
-           return reduce(op.sub,agruments,0)
+    elif foo=='-':           
+        if len(agruments)==1:
+            return -agruments[0]
+        else:
+               return reduce(op.sub,agruments[1:],agruments[0])
     elif foo=='*':
            return reduce(op.mul,agruments,1)
     elif foo=='/':
@@ -168,7 +171,15 @@ def applyFunction(exp,env):
         return process(body,local_env)
 
 def process(exp,env):
-    #print exp
+    if not isinstance(exp,list):
+        if selfEvaluating(exp):
+            return exp
+        elif isVariable(exp,env):
+            return lookupVariableValue(exp,env)
+        elif isQuoted(exp):
+            return exp
+        else:
+            return env.findProcedure(exp)
     if selfEvaluating(exp[0]):
         return exp[0]
     elif isVariable(exp[0],env):

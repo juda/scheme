@@ -16,7 +16,8 @@ Implement a scheme Interpretation
 
 ##2014/7/9
 修复了参数为过程时的bug
-
+修复了-号未区分减号和负号
+能实现递归过程，但答案未能正确输出
 
 
 =======
