@@ -3,6 +3,7 @@ from global_dict import *
 from mutual_with_text import *
 import operator as op
 import re
+import pdb
 
 def selfEvaluating(exp):
     #print exp[0]
@@ -66,29 +67,29 @@ def applyPrimitiveFunction(foo,agruments):
     pattern=re.compile(r'c[a|d]+r')
     #print foo
     if foo=='+':
-        return reduce(op.add,agruments,0)
+           return reduce(op.add,agruments,0)
     elif foo=='-':
-        return reduce(op.sub,agruments,0)
+           return reduce(op.sub,agruments,0)
     elif foo=='*':
-        return reduce(op.mul,agruments,1)
+           return reduce(op.mul,agruments,1)
     elif foo=='/':
-        return reduce(op.div,agruments[1:],agruments[0])
+           return reduce(op.div,agruments[1:],agruments[0])
     elif foo=='not':
-        return not agruments[0]
+           return not agruments[0]
     elif foo=='>':
-        return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
+           return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
     elif foo=='<':
-        return reduce(op.and_,map(op.lt,agruments[:-1],agruments[1:]),True)
+           return reduce(op.and_,map(op.lt,agruments[:-1],agruments[1:]),True)
     elif foo=='>=':
-        return reduce(op.and_,map(op.ge,agruments[:-1],agruments[1:]),True)
+           return reduce(op.and_,map(op.ge,agruments[:-1],agruments[1:]),True)
     elif foo=='<=':
-        return reduce(op.and_,map(op.le,agruments[:-1],agruments[1:]),True)
+           return reduce(op.and_,map(op.le,agruments[:-1],agruments[1:]),True)
     elif foo=='=' or foo=='equal?':
         return reduce(op.and_,map(op.eq,agruments[:-1],agruments[1:]),True)
     elif foo=='eq?':
-        return reduce(op.and_,map(op.is_,agruments[:-1],agruments[1:]),True)
+           return reduce(op.and_,map(op.is_,agruments[:-1],agruments[1:]),True)
     elif foo=='length':
-        return len(agruments)
+           return len(agruments)
     elif foo=='and':
         return reduce(op.and_,map(op.and_,agruments[:-1],agruments[1:]),True)
     elif foo=='or':
@@ -103,7 +104,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='list':
         return agruments
     elif foo=='list?':
-        return len(agruments)==1 and isinstance(agruments[0],list)
+           return len(agruments)==1 and isinstance(agruments[0],list)
     elif foo=='null?':
         return agruments==[]
     elif foo=='symbol?':
@@ -122,9 +123,9 @@ def applyPrimitiveFunction(foo,agruments):
 
 def preProcess(exp,env):
     if isinstance(exp,list):
-        return process(exp,env)
+           return process(exp,env)
     else:
-        return exp
+           return exp
 
 def applyPrimitiveProcedure(body,env):
     #print 'noe',body
@@ -167,6 +168,7 @@ def applyFunction(exp,env):
         return process(body,local_env)
 
 def process(exp,env):
+    #print exp
     if selfEvaluating(exp[0]):
         return exp[0]
     elif isVariable(exp[0],env):
