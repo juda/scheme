@@ -160,7 +160,7 @@ def applyFunction(exp,env):
     temp=len(agruments)
     #print parameters,agruments
     for i in range(temp):
-        local_env.addVariable(parameters[i],agruments[i])
+        local_env.addVariable(parameters[i],process(agruments[i],env))
     if env.findProcedure(body[0]):
         return applyPrimitiveProcedure(body,env)
     else:
