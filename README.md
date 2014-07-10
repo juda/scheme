@@ -25,9 +25,10 @@ Implement a scheme Interpretation
 修复了global_dict里面共享变量的bug
 
 正确计算递归函数
-	>(define (f x) (if (= x 1) 1 (* x (f (- x 1)))))
-	>(f 5)
-	120
+
+    >(define (f x) (if (= x 1) 1 (* x (f (- x 1)))))
+    >(f 5)
+    120
 
 
 
