@@ -85,6 +85,8 @@ def applyPrimitiveFunction(foo,agruments):
            return reduce(op.div,agruments[1:],agruments[0])
     elif foo=='not':
            return not agruments[0]
+    elif foo=='remainder':
+        return agruments[0]%agruments[1]
     elif foo=='>':
            return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
     elif foo=='<':
