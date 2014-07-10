@@ -133,7 +133,10 @@ def preProcess(exp,env):
 def applyPrimitiveProcedure(body,env):
     #print 'noe',body
     foo=body[0]
-    parameters=map(lambda x:preProcess(x,env),body[1:])
+    local_env=mydict(env)
+    #print 1,env.variable
+    parameters=map(lambda x:preProcess(x,local_env),body[1:])
+    #print 2,env.variable
     #print 'aaa'
     agruments=[]
     for i in parameters:
@@ -145,7 +148,7 @@ def applyPrimitiveProcedure(body,env):
     return applyPrimitiveFunction(foo,agruments)
 
 def applyFunction(exp,env):
-    #print exp
+    pdb.set_trace()
     if isinstance(exp[0],list):
         foo=process(exp[0],env)
     else:
@@ -167,7 +170,7 @@ def applyFunction(exp,env):
     if env.findProcedure(body[0]):
         return applyPrimitiveProcedure(body,env)
     else:
-        #print 'here'
+        #sprint local_env.variable
         return process(body,local_env)
 
 def process(exp,env):

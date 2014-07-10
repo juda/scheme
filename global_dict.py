@@ -6,11 +6,10 @@ from mutual_with_text import *
 import math
 
 class mydict:
-    father=None
-    procedure={}
-    variable={}
     def __init__(self,father=None):
         self.father=father
+        self.procedure={}
+        self.variable={}
 
     def findProcedure(self,name):
         w=self
