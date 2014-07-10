@@ -10,10 +10,16 @@ def selfEvaluating(exp):
     return (isnumber(exp[0]) or isQuoted(exp[0]))
 
 def isVariable(exp,env):
-    return  isinstance(exp[0],str) and env.findVariable(exp)
+    try:
+        return  isinstance(exp[0],str) and env.findVariable(exp)
+    except Exception():
+        return False
 
 def isQuoted(exp):
-    return exp[0][0]=='"' and exp[0][-1]=='"'
+    try:
+        return exp[0][0]=='"' and exp[0][-1]=='"'
+    except Exception():
+        return False
 
 def lookupVariableValue(exp,env):
     return env.findVariable(exp)
@@ -140,7 +146,9 @@ def applyPrimitiveProcedure(body,env):
     #print 'aaa'
     agruments=[]
     for i in parameters:
-        if isVariable(i,env):
+        if isinstance(i,int):
+            agruments.append(i)
+        elif isVariable(i,env):
             agruments.append(transnumber(env.findVariable(i)))
         elif isnumber(i):
             agruments.append(transnumber(i))
@@ -148,7 +156,7 @@ def applyPrimitiveProcedure(body,env):
     return applyPrimitiveFunction(foo,agruments)
 
 def applyFunction(exp,env):
-    pdb.set_trace()
+    #pdb.set_trace()
     if isinstance(exp[0],list):
         foo=process(exp[0],env)
     else:

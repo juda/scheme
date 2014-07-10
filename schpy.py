@@ -3,6 +3,7 @@ from mutual_with_text import *
 from global_dict import *
 from process import process
 from parse import *
+import pdb
 
 def repl():
     '''read-eval-print-loop'''
@@ -30,6 +31,7 @@ def repl():
                     print global_env.env[statement]
             else:
                 #try:
+                #pdb.set_trace()
                 val=process(parse(statement),global_env)
                 if val is not None:
                     print tostring(val)
