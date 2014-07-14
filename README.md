@@ -30,6 +30,18 @@ Implement a scheme Interpretation
     >(f 5)
     120
 
+##2014/7/14
+实现了内部定义
+
+    > (define (f x) (
+      (define (g x) (* x x))
+      (+ x (g x))))
+    > (f 10)
+    110
+
+修复了lambda函数定义时存在的bug
+
+修复了对list处理时的bug，但对空表操作会存在实现上的bug
 
 
 =======

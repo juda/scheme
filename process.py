@@ -47,11 +47,9 @@ def makeObject(para,body):
     return (body,para)
 
 def evalSequence(exp,env):
-    if len(exp)==1:
-        return process(exp[0],env)
-    else:
-        process(exp[0],env)
-        return evalSequence(exp[1:],env)
+    for i in exp:
+        temp=process(i,env)
+    return temp
 
 def condIf(exp,env):
     for i in exp[1:]:
@@ -197,6 +195,8 @@ def process(exp,env):
             return exp
         else:
             return env.findObject(exp)
+    if isinstance(exp[0],list):
+        return evalSequence(exp,env)
     if exp[0]=='set!':
         evalAssignment(exp,env)
     elif exp[0]=='define':

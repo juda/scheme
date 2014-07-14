@@ -11,6 +11,8 @@ class mydict:
         self.object={}
 
     def findObject(self,name):
+        if isinstance(name,list):
+            return False
         w=self
         while w!=None:
             if name in w.object:
