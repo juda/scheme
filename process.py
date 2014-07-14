@@ -7,33 +7,33 @@ import pdb
 
 def selfEvaluating(exp):
     #print exp[0]
-    return (isnumber(exp[0]) or isQuoted(exp[0]))
+    return (isnumber(exp) or isQuoted(exp))
 
-def isVariable(exp,env):
+def isObject(exp,env):
     try:
-        return  isinstance(exp[0],str) and env.findVariable(exp)
+        return  isinstance(exp,str) and env.findObject(exp)
     except Exception():
         return False
 
 def isQuoted(exp):
     try:
-        return exp[0][0]=='"' and exp[0][-1]=='"'
+        return exp[0]=='"' and exp[-1]=='"'
     except Exception():
         return False
 
-def lookupVariableValue(exp,env):
-    return env.findVariable(exp)
+def lookupObjectValue(exp,env):
+    return env.findObject(exp)
 
 def evalAssignment(exp,env):
-    env.setVariable(exp[1],exp[2])
+    env.setObject(exp[1],exp[2])
 
 
 def evalDefinition(exp,env):
     #print exp
     if isinstance(exp[1],list):
-        env.procedure[exp[1][0]]=makeProcedure(exp[1][1:],exp[2])
+        env.object[exp[1][0]]=makeObject(exp[1][1:],exp[2])
     else:
-        env.addVariable(exp[1],process(exp[2],env))
+        env.addObject(exp[1],process(exp[2],env))
 
 def evalIf(exp,env):
     if process(exp[1],env):
@@ -43,7 +43,7 @@ def evalIf(exp,env):
         #print 'f'
         return process(exp[3],env)
 
-def makeProcedure(para,body):
+def makeObject(para,body):
     return (body,para)
 
 def evalSequence(exp,env):
@@ -129,7 +129,7 @@ def applyPrimitiveFunction(foo,agruments):
             raise SyntaxError("error parameters in %s"%(foo,))
         return catch(foo[1:-1],agruments[0])
     else:
-        raise NameError("Doesn't exist or lock of implementation this primitive procedure %s"%(foo,))
+        raise NameError("Doesn't exist or lock of implementation this primitive Object %s"%(foo,))
 
 
 def preProcess(exp,env):
@@ -138,20 +138,20 @@ def preProcess(exp,env):
     else:
            return exp
 
-def applyPrimitiveProcedure(body,env):
+def applyPrimitiveObject(body,env):
     #print 'noe',body
     foo=body[0]
     local_env=mydict(env)
-    #print 1,env.variable
+    #print 1,env.Object
     parameters=map(lambda x:preProcess(x,local_env),body[1:])
-    #print 2,env.variable
+    #print 2,env.Object
     #print 'aaa'
     agruments=[]
     for i in parameters:
         if isinstance(i,int):
             agruments.append(i)
-        elif isVariable(i,env):
-            agruments.append(transnumber(env.findVariable(i)))
+        elif isObject(i,env):
+            agruments.append(transnumber(env.findObject(i)))
         elif isnumber(i):
             agruments.append(transnumber(i))
     #print foo,agruments
@@ -164,9 +164,9 @@ def applyFunction(exp,env):
     else:
                 try:
                         #print 'hea'
-                        return applyPrimitiveProcedure(exp,env)
+                        return applyPrimitiveObject(exp,env)
                 except Exception:
-                        foo=env.findProcedure(exp[0])
+                        foo=env.findObject(exp[0])
     body,parameters=foo
     #print body,parameters
     agruments=exp[1:]
@@ -176,37 +176,31 @@ def applyFunction(exp,env):
     temp=len(agruments)
     #print parameters,agruments
     for i in range(temp):
-        local_env.addVariable(parameters[i],process(agruments[i],env))
-    if env.findProcedure(body[0]):
-        return applyPrimitiveProcedure(body,env)
+        local_env.addObject(parameters[i],process(agruments[i],env))
+    if env.findObject(body[0]):
+        return applyPrimitiveObject(body,env)
     else:
-        #sprint local_env.variable
+        #sprint local_env.Object
         return process(body,local_env)
 
 def process(exp,env):
     if not isinstance(exp,list):
         if selfEvaluating(exp):
             return exp
-        elif isVariable(exp,env):
-            return lookupVariableValue(exp,env)
+        elif isObject(exp,env):
+            return lookupObjectValue(exp,env)
         elif isQuoted(exp):
             return exp
         else:
-            return env.findProcedure(exp)
-    if selfEvaluating(exp[0]):
-        return exp[0]
-    elif isVariable(exp[0],env):
-        return lookupVariableValue(exp[0],env)
-    elif isQuoted(exp[0]):
-        return exp[0]
-    elif exp[0]=='set!':
+            return env.findObject(exp)
+    if exp[0]=='set!':
         evalAssignment(exp,env)
     elif exp[0]=='define':
         evalDefinition(exp,env)
     elif exp[0]=='if':
         return evalIf(exp,env)
     elif exp[0]=='lambda':
-        return makeProcedure(exp[1],exp[2],env)
+        return makeObject(exp[1],exp[2])
     elif exp[0]=='begin':
         return evalSequence(exp[1:],env)
     elif exp[0]=='cond':
