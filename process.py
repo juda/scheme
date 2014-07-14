@@ -151,7 +151,11 @@ def applyPrimitiveObject(body,env):
         if isinstance(i,int):
             agruments.append(i)
         elif isObject(i,env):
-            agruments.append(transnumber(env.findObject(i)))
+            temp=env.findObject(i)
+            if isinstance(temp,list):
+                agruments.append(temp)
+            else:
+                agruments.append(transnumber(temp))                
         elif isnumber(i):
             agruments.append(transnumber(i))
     #print foo,agruments

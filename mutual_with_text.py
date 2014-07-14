@@ -30,6 +30,6 @@ def transnumber(number):
 
 def tostring(exp):
     if isinstance(exp,list):
-        return '('+' '.join(map(str,exp))+')'
+        return '('+' '.join(map(tostring,exp))+')'
     else:
         return str(exp)
