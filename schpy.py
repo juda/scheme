@@ -28,7 +28,7 @@ def repl():
                 if isnumber(statement):
                     print transnumber(statement)
                 else:
-                    print global_env.env[statement]
+                    print tostring(global_env.findObject(statement))
             else:
                 #try:
                 #pdb.set_trace()

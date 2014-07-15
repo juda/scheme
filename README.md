@@ -44,5 +44,23 @@ Implement a scheme Interpretation
 修复了对list处理时的bug，但对空表操作会存在实现上的bug
 
 
+##2014/7/15
+完善了对列表的操作，成功执行以下代码：
+
+    > (define (zipWith f x y) (if (or (null? x) (null? y))
+                              (quote ())
+                              (cons (f (car x) (car y))
+                                    (zipWith f (cdr x) (cdr y)))))
+    > (define x (list))
+    > (define y (list 1 2 3))
+    > (define f (lambda (x y) (* x y)))
+    > (zipWith f x y)
+    ()
+    > (define x (list 5 6 7 8))
+    > (zipWith f x y)
+    (5 12 21 ())
+
+ 
+
 =======
 

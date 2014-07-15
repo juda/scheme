@@ -14,10 +14,10 @@ def parentheseBalance(statement):
 def isnumber(number):
     try:
         int(number)
-    except ValueError:
+    except:
         try:
             float(number)
-        except ValueError:
+        except:
             return False
         return True
     return True
@@ -25,7 +25,7 @@ def isnumber(number):
 def transnumber(number):
     try:
         return int(number)
-    except ValueError:
+    except:
         return float(number)
 
 def tostring(exp):

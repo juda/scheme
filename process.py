@@ -11,14 +11,14 @@ def selfEvaluating(exp):
 
 def isObject(exp,env):
     try:
-        return  isinstance(exp,str) and env.findObject(exp)
-    except Exception():
+        return  isinstance(exp,str) and env.findObject(exp)!=False
+    except:
         return False
 
 def isQuoted(exp):
     try:
         return exp[0]=='"' and exp[-1]=='"'
-    except Exception():
+    except:
         return False
 
 def lookupObjectValue(exp,env):
@@ -113,9 +113,9 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='list':
         return agruments
     elif foo=='list?':
-           return len(agruments)==1 and isinstance(agruments[0],list)
+           return len(agruments)==0 or (len(agruments)==1 and isinstance(agruments[0],list))
     elif foo=='null?':
-        return agruments==[]
+        return len(agruments)==1 and agruments[0]==[]
     elif foo=='symbol?':
         return len(agruments)==1 and isinstance(agruments[0],str)
     elif foo=='display':
@@ -156,6 +156,8 @@ def applyPrimitiveObject(body,env):
                 agruments.append(transnumber(temp))                
         elif isnumber(i):
             agruments.append(transnumber(i))
+        else:
+            agruments.append(i)
     #print foo,agruments
     return applyPrimitiveFunction(foo,agruments)
 
@@ -167,7 +169,7 @@ def applyFunction(exp,env):
                 try:
                         #print 'hea'
                         return applyPrimitiveObject(exp,env)
-                except Exception:
+                except:
                         foo=env.findObject(exp[0])
     body,parameters=foo
     #print body,parameters
@@ -209,5 +211,7 @@ def process(exp,env):
         return evalSequence(exp[1:],env)
     elif exp[0]=='cond':
         return condIf(exp,env)
+    elif exp[0]=='quote':
+        return tostring(exp[1])
     else:
         return applyFunction(exp,env)
