@@ -228,7 +228,7 @@ def process(exp,env):
             return exp[1:]
         else:
             return env.findObject(exp)
-    if isinstance(exp[0],list):
+    if isinstance(exp[0],list) and exp[0][0]=='define':
         return evalSequence(exp,env)
     if exp[0]=='set!':
         evalAssignment(exp,env)
@@ -237,7 +237,10 @@ def process(exp,env):
     elif exp[0]=='if':
         return evalIf(exp,env)
     elif exp[0]=='lambda':
-        return makeObject(exp[1],exp[2])
+        if len(exp)>3:
+            return makeObject(exp[1],exp[2:])
+        else:
+            return makeObject(exp[1],exp[2])
     elif exp[0]=='begin':
         return evalSequence(exp[1:],env)
     elif exp[0]=='cond':
