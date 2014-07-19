@@ -105,7 +105,10 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='*':
            return reduce(op.mul,agruments,1)
     elif foo=='/':
-           return reduce(op.div,agruments[1:],fractions.Fraction(agruments[0],1))
+        if isinstance(agruments[0],float):
+            return reduce(op.div,agruments[1:],agruments[0])
+        else:
+            return reduce(op.div,agruments[1:],fractions.Fraction(agruments[0],1))
     elif foo=='not':
            return not agruments[0]
     elif foo=='modulo':
@@ -217,11 +220,7 @@ def applyFunction(exp,env):
     #print parameters,agruments
     for i in range(temp):
         local_env.addObject(parameters[i],process(agruments[i],env))
-    if env.findObject(body[0]):
-        return applyPrimitiveObject(body,env)
-    else:
-        #sprint local_env.Object
-        return process(body,local_env)
+    return process(body,local_env)
 
 def process(exp,env):
     if not isinstance(exp,list):
