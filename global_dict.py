@@ -12,14 +12,14 @@ class mydict:
 
     def findObject(self,name):
         if isinstance(name,list):
-            return False
+            return
         w=self
         while w!=None:
             if name in w.object:
                 return w.object[name]
             else:
                 w=w.father
-        return False
+        return
 
     def addObject(self,name,value):
         self.object[name]=value

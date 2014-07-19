@@ -1,4 +1,5 @@
 '''mutual with text'''
+import numbers
 
 def parentheseBalance(statement):
     res=0
@@ -12,6 +13,8 @@ def parentheseBalance(statement):
     return res==0
 
 def isnumber(number):
+    if isinstance(number,numbers.Number):
+        return True
     try:
         int(number)
     except:

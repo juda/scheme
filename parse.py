@@ -14,6 +14,10 @@ def tokenize(statement):
             if flag:
                 statement=statement[:i]+'[blank]'+statement[i+1:]
                 i+=6
+        elif statement[i:i+2]=="'(":
+            if not flag:
+                statement=statement[:i]+'(quote '+statement[i+2:]
+                i+=6
         i+=1
     statement=statement.replace('(',' ( ').replace(')',' ) ').split()
     j=len(statement)

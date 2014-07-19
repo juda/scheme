@@ -4,6 +4,8 @@ from mutual_with_text import *
 import operator as op
 import re
 import pdb
+import fractions
+import numbers
 
 def selfEvaluating(exp):
     #print exp[0]
@@ -11,18 +13,15 @@ def selfEvaluating(exp):
 
 def isObject(exp,env):
     try:
-        return  isinstance(exp,str) and env.findObject(exp)!=False
+        return  isinstance(exp,str) and env.findObject(exp)!=None
     except:
         return False
 
 def isQuoted(exp):
-    try:
-        return exp[0]=='"' and exp[-1]=='"'
-    except:
-        return False
+    return exp[0]=="'"
 
-def lookupObjectValue(exp,env):
-    return env.findObject(exp)
+def isstring(exp):
+    return len(exp)>1 and exp[0]=='"' and exp[-1]=='"' 
 
 def evalAssignment(exp,env):
     env.setObject(exp[1],exp[2])
@@ -50,6 +49,19 @@ def evalSequence(exp,env):
     for i in exp:
         temp=process(i,env)
     return temp
+
+def evalQuote(exp):
+    if isinstance(exp[0],list) or isinstance(exp,list):
+        if isinstance(exp,list):
+            temp=exp
+        else:
+            temp=exp[0]
+        res=[]
+        for i in temp:
+            res.append("'%s"%(i,))
+        return res
+    else:
+        return "'%s"%(exp[0],)
 
 def condIf(exp,env):
     for i in exp[1:]:
@@ -80,10 +92,10 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='*':
            return reduce(op.mul,agruments,1)
     elif foo=='/':
-           return reduce(op.div,agruments[1:],agruments[0])
+           return reduce(op.div,agruments,fractions.Fraction(1,1))
     elif foo=='not':
            return not agruments[0]
-    elif foo=='remainder':
+    elif foo=='modulo':
         return agruments[0]%agruments[1]
     elif foo=='>':
            return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
@@ -112,6 +124,8 @@ def applyPrimitiveFunction(foo,agruments):
             return agruments
     elif foo=='list':
         return agruments
+    elif foo=='append':
+        agruments[0].append(agruments[1])
     elif foo=='list?':
            return len(agruments)==0 or (len(agruments)==1 and isinstance(agruments[0],list))
     elif foo=='null?':
@@ -152,8 +166,10 @@ def applyPrimitiveObject(body,env):
             temp=env.findObject(i)
             if isinstance(temp,list):
                 agruments.append(temp)
+            elif isnumber(temp):
+                agruments.append(transnumber(temp))
             else:
-                agruments.append(transnumber(temp))                
+                agruments.append(temp)
         elif isnumber(i):
             agruments.append(transnumber(i))
         else:
@@ -189,12 +205,14 @@ def applyFunction(exp,env):
 
 def process(exp,env):
     if not isinstance(exp,list):
-        if selfEvaluating(exp):
+        if isinstance(exp,numbers.Number):
             return exp
-        elif isObject(exp,env):
-            return lookupObjectValue(exp,env)
+        elif isnumber(exp):
+            return transnumber(exp)
+        elif isstring(exp):
+            return exp
         elif isQuoted(exp):
-            return exp
+            return exp[1:]
         else:
             return env.findObject(exp)
     if isinstance(exp[0],list):
@@ -212,6 +230,6 @@ def process(exp,env):
     elif exp[0]=='cond':
         return condIf(exp,env)
     elif exp[0]=='quote':
-        return tostring(exp[1])
+        return evalQuote(exp[1:])
     else:
         return applyFunction(exp,env)
