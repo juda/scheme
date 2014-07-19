@@ -30,9 +30,9 @@ def evalAssignment(exp,env):
 def evalDefinition(exp,env):
     #print exp
     if isinstance(exp[1],list):
-        env.object[exp[1][0]]=makeObject(exp[1][1:],exp[2])
+        env.object[exp[1][0]]=makeObject(exp[1][1:],exp[2:])
     else:
-        env.addObject(exp[1],process(exp[2],env))
+        env.addObject(exp[1],process(exp[2:],env))
 
 def evalIf(exp,env):
     if process(exp[1],env):
@@ -51,11 +51,13 @@ def evalSequence(exp,env):
     return temp
 
 def evalQuote(exp):
-    if isinstance(exp[0],list) or isinstance(exp,list):
-        if isinstance(exp,list):
-            temp=exp
-        else:
+    if exp==[]:
+        return []
+    if isinstance(exp[0],list) or len(exp)>1:
+        if isinstance(exp[0],list):
             temp=exp[0]
+        else:
+            temp=exp
         res=[]
         for i in temp:
             res.append("'%s"%(i,))
