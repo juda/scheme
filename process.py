@@ -29,10 +29,15 @@ def evalAssignment(exp,env):
 
 def evalDefinition(exp,env):
     #print exp
-    if isinstance(exp[1],list):
-        env.object[exp[1][0]]=makeObject(exp[1][1:],exp[2:])
+    if len(exp)>3:
+        temp=exp[2:]
     else:
-        env.addObject(exp[1],process(exp[2:],env))
+        temp=exp[2]
+    if isinstance(exp[1],list):
+        
+        env.object[exp[1][0]]=makeObject(exp[1][1:],temp)
+    else:
+        env.addObject(exp[1],process(temp,env))
 
 def evalIf(exp,env):
     if process(exp[1],env):
@@ -60,10 +65,16 @@ def evalQuote(exp):
             temp=exp
         res=[]
         for i in temp:
-            res.append("'%s"%(i,))
+            if isnumber(i):
+                res.append(transnumber(i))
+            else:
+                res.append("'%s"%(i,))
         return res
     else:
-        return "'%s"%(exp[0],)
+        if isnumber(exp[0]):
+            return transnumber(exp[0])
+        else:
+            return "'%s"%(exp[0],)
 
 def condIf(exp,env):
     for i in exp[1:]:
@@ -94,7 +105,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='*':
            return reduce(op.mul,agruments,1)
     elif foo=='/':
-           return reduce(op.div,agruments,fractions.Fraction(1,1))
+           return reduce(op.div,agruments[1:],fractions.Fraction(agruments[0],1))
     elif foo=='not':
            return not agruments[0]
     elif foo=='modulo':
