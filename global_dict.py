@@ -6,6 +6,10 @@ from mutual_with_text import *
 import math
 
 class mydict:
+    BaseFunctions=('+','-','*','/','not','modulo','>','<','>=','<=',
+                  '=','equal?','eq?','length','and','or','cons','list','null?',
+                  'symbol','display','newline')
+    
     def __init__(self,father=None):
         self.father=father
         self.object={}

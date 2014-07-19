@@ -144,7 +144,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='null?':
         return len(agruments)==1 and agruments[0]==[]
     elif foo=='symbol?':
-        return len(agruments)==1 and isinstance(agruments[0],str)
+        return len(agruments)==1 and isQuoted(agruments[0])
     elif foo=='display':
         print tostring(agruments[0])
     elif foo=='newline':
@@ -156,6 +156,14 @@ def applyPrimitiveFunction(foo,agruments):
     else:
         raise NameError("Doesn't exist or lock of implementation this primitive Object %s"%(foo,))
 
+
+def isBaseFunctions(foo,env):
+    if foo in env.BaseFunctions:
+        return True
+    pattern=re.compile(r'c[a|d]+r')
+    if pattern.match(foo)!=None and foo==foo[pattern.match(foo).start():pattern.match(foo).end()]:
+        return True
+    return False
 
 def preProcess(exp,env):
     if isinstance(exp,list):
@@ -195,10 +203,9 @@ def applyFunction(exp,env):
     if isinstance(exp[0],list):
         foo=process(exp[0],env)
     else:
-                try:
-                        #print 'hea'
+                if isBaseFunctions(exp[0],env):
                         return applyPrimitiveObject(exp,env)
-                except:
+                else:
                         foo=env.findObject(exp[0])
     body,parameters=foo
     #print body,parameters
@@ -228,7 +235,7 @@ def process(exp,env):
             return exp[1:]
         else:
             return env.findObject(exp)
-    if isinstance(exp[0],list) and exp[0][0]=='define':
+    if isinstance(exp[0],list) and not isinstance(process(exp[0],env),tuple):
         return evalSequence(exp,env)
     if exp[0]=='set!':
         evalAssignment(exp,env)
