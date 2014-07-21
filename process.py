@@ -183,6 +183,12 @@ def applyPrimitiveObject(body,env):
             agruments.append(i)
     return applyPrimitiveFunction(foo,agruments)
 
+def isMatch(para,agru):
+    if '.' in para:
+        return len(para)-2<=len(agru)
+    else:
+        return len(para)==len(agru)
+
 def applyFunction(exp,env):
     if isinstance(exp[0],list):
         foo=process(exp[0],env)
@@ -193,12 +199,15 @@ def applyFunction(exp,env):
                         foo=env.findObject(exp[0])
     body,parameters=foo
     agruments=exp[1:]
-    if len(parameters)!=len(agruments):
+    if not isMatch(parameters,agruments):
         raise SyntaxError("Can't match the agruments and parameters")
     local_env=mydict(env)
     temp=len(agruments)
     #print parameters,agruments
-    for i in range(temp):
+    for i in xrange(temp):
+        if parameters[i]=='.':
+            local_env.addObject(parameters[i+1],List(agruments[i:]))
+            break
         local_env.addObject(parameters[i],process(agruments[i],env))
     return process(body,local_env)
 
