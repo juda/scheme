@@ -7,8 +7,9 @@ import math
 
 class mydict:
     BaseFunctions=('+','-','*','/','not','modulo','>','<','>=','<=',
-                  '=','equal?','eq?','length','and','or','cons','list','null?',
-                  'symbol','display','newline')
+                  '=','equal?','eq?','length','and','or','cons','list',
+                   'append','list?','null?',
+                  'symbol?','display','newline')
     
     def __init__(self,father=None):
         self.father=father

@@ -27,6 +27,8 @@ def repl():
             if statement[0]!='(':
                 if isnumber(statement):
                     print transnumber(statement)
+                elif isQuoted(statement):
+                    print statement[1:]
                 else:
                     print tostring(global_env.findObject(statement))
             else:

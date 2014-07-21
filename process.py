@@ -6,6 +6,7 @@ import re
 import pdb
 import fractions
 import numbers
+from pair import *
 
 def selfEvaluating(exp):
     #print exp[0]
@@ -17,8 +18,6 @@ def isObject(exp,env):
     except:
         return False
 
-def isQuoted(exp):
-    return exp[0]=="'"
 
 def isstring(exp):
     return len(exp)>1 and exp[0]=='"' and exp[-1]=='"' 
@@ -40,10 +39,8 @@ def evalDefinition(exp,env):
 
 def evalIf(exp,env):
     if process(exp[1],env):
-        #print 't'
         return process(exp[2],env)
     else:
-        #print 'f'
         return process(exp[3],env)
 
 def makeObject(para,body):
@@ -54,26 +51,19 @@ def evalSequence(exp,env):
         temp=process(i,env)
     return temp
 
-def evalQuote(exp):
-    if exp==[]:
-        return []
-    if isinstance(exp[0],list) or len(exp)>1:
-        if isinstance(exp[0],list):
-            temp=exp[0]
+def evalQuoted(exp,env):
+    res=Pair.Nil
+    for i in xrange(len(exp)-1,-1,-1):
+        if isinstance(exp[i],list):
+            temp=process(exp[i],env)
+        elif isnumber(exp[i]):
+            temp=transnumber(exp[i])
+        elif isQuoted(exp[i]):
+            temp=transQuoted(exp[i])
         else:
-            temp=exp
-        res=[]
-        for i in temp:
-            if isnumber(i):
-                res.append(transnumber(i))
-            else:
-                res.append("'%s"%(i,))
-        return res
-    else:
-        if isnumber(exp[0]):
-            return transnumber(exp[0])
-        else:
-            return "'%s"%(exp[0],)
+            temp=exp[i]
+        res=cons(temp,res)
+    return res
 
 def condIf(exp,env):
     for i in exp[1:]:
@@ -87,13 +77,12 @@ def catch(command,alist):
     if command=='':
         return alist
     elif command[-1]=='a':
-        return catch(command[:-1],alist[0])
+        return catch(command[:-1],alist.car())
     else:
-        return catch(command[:-1],alist[1:])
+        return catch(command[:-1],alist.cdr())
 
 def applyPrimitiveFunction(foo,agruments):
     pattern=re.compile(r'c[a|d]+r')
-    #print foo
     if foo=='+':
            return reduce(op.add,agruments,0)
     elif foo=='-':           
@@ -125,7 +114,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='eq?':
            return reduce(op.and_,map(op.is_,agruments[:-1],agruments[1:]),True)
     elif foo=='length':
-           return len(agruments)
+           return Length(agruments[0])
     elif foo=='and':
         return reduce(op.and_,map(op.and_,agruments[:-1],agruments[1:]),True)
     elif foo=='or':
@@ -133,18 +122,15 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='cons':
         if len(agruments)!=2:
             raise SyntaxError("the number of parameters of cons is uncorrect")
-        if isinstance(agruments[1],list):
-            return [agruments[0]]+agruments[1]
-        else:
-            return agruments
+        return cons(agruments[0],agruments[1])
     elif foo=='list':
-        return agruments
+        return List(agruments)
     elif foo=='append':
-        agruments[0].append(agruments[1])
+        return Append(agruments[0],agruments[1])
     elif foo=='list?':
-           return len(agruments)==0 or (len(agruments)==1 and isinstance(agruments[0],list))
+           return len(agruments)==0 or (len(agruments)==1 and isinstance(agruments[0],Pair))
     elif foo=='null?':
-        return len(agruments)==1 and agruments[0]==[]
+        return len(agruments)==1 and Length(agruments[0])==0
     elif foo=='symbol?':
         return len(agruments)==1 and isQuoted(agruments[0])
     elif foo=='display':
@@ -152,7 +138,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='newline':
         print
     elif pattern.match(foo)!=None and foo==foo[pattern.match(foo).start():pattern.match(foo).end()]:
-        if not (isinstance(agruments[0],list) and len(agruments)==1):
+        if not (isinstance(agruments[0],Pair) and len(agruments)==1):
             raise SyntaxError("error parameters in %s"%(foo,))
         return catch(foo[1:-1],agruments[0])
     else:
@@ -174,13 +160,9 @@ def preProcess(exp,env):
            return exp
 
 def applyPrimitiveObject(body,env):
-    #print 'noe',body
     foo=body[0]
     local_env=mydict(env)
-    #print 1,env.Object
     parameters=map(lambda x:preProcess(x,local_env),body[1:])
-    #print 2,env.Object
-    #print 'aaa'
     agruments=[]
     for i in parameters:
         if isinstance(i,int):
@@ -195,9 +177,10 @@ def applyPrimitiveObject(body,env):
                 agruments.append(temp)
         elif isnumber(i):
             agruments.append(transnumber(i))
+        elif isQuoted(i):
+            agruments.append(i[1:])
         else:
             agruments.append(i)
-    #print foo,agruments
     return applyPrimitiveFunction(foo,agruments)
 
 def applyFunction(exp,env):
@@ -249,6 +232,10 @@ def process(exp,env):
     elif exp[0]=='cond':
         return condIf(exp,env)
     elif exp[0]=='quote':
-        return evalQuote(exp[1:])
+        return transQuoted(exp[1])
+    elif exp[0]=='QUOTE':
+        if len(exp)==1:
+            return Pair()
+        return evalQuoted(exp[1:],env)
     else:
         return applyFunction(exp,env)

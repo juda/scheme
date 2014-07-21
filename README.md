@@ -66,5 +66,7 @@ Implement a scheme Interpretation
 ##2014/7/21
 修复了牛顿迭代法的bug，现能正确计算牛顿迭代法
 
+重写了list的底层实现，完善了单引号‘的语法糖实现
+
 =======
 

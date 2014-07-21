@@ -25,6 +25,14 @@ def isnumber(number):
         return True
     return True
 
+def isQuoted(exp):
+    return isinstance(exp,str) and exp[0]=="'"
+
+def transQuoted(exp):
+    if isQuoted(exp):
+        return exp
+    return "'%s"%(exp,)
+
 def transnumber(number):
     if isinstance(number,numbers.Number):
         return number
