@@ -26,10 +26,13 @@ def isnumber(number):
     return True
 
 def transnumber(number):
-    try:
-        return int(number)
-    except:
-        return float(number)
+    if isinstance(number,numbers.Number):
+        return number
+    else:
+        try:
+            return int(number)
+        except:
+            return float(number)
 
 def tostring(exp):
     if isinstance(exp,list):

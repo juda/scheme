@@ -58,9 +58,13 @@ Implement a scheme Interpretation
     ()
     > (define x (list 5 6 7 8))
     > (zipWith f x y)
-    (5 12 21 ())
+    (5 12 21)
 
- 
+##2014/7/19
+完善了有理数的计算
+
+##2014/7/21
+修复了牛顿迭代法的bug，现能正确计算牛顿迭代法
 
 =======
 

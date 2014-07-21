@@ -33,8 +33,7 @@ def evalDefinition(exp,env):
         temp=exp[2:]
     else:
         temp=exp[2]
-    if isinstance(exp[1],list):
-        
+    if isinstance(exp[1],list):        
         env.object[exp[1][0]]=makeObject(exp[1][1:],temp)
     else:
         env.addObject(exp[1],process(temp,env))
@@ -202,7 +201,6 @@ def applyPrimitiveObject(body,env):
     return applyPrimitiveFunction(foo,agruments)
 
 def applyFunction(exp,env):
-    #pdb.set_trace()
     if isinstance(exp[0],list):
         foo=process(exp[0],env)
     else:
@@ -211,7 +209,6 @@ def applyFunction(exp,env):
                 else:
                         foo=env.findObject(exp[0])
     body,parameters=foo
-    #print body,parameters
     agruments=exp[1:]
     if len(parameters)!=len(agruments):
         raise SyntaxError("Can't match the agruments and parameters")

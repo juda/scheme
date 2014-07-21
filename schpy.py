@@ -30,13 +30,13 @@ def repl():
                 else:
                     print tostring(global_env.findObject(statement))
             else:
-                #try:
-                #pdb.set_trace()
-                val=process(parse(statement),global_env)
-                if val is not None:
-                    print tostring(val)
-                #except Exception as err:
-                    #print "[error]%s"%(err,)
+                try:
+                    #pdb.set_trace()
+                    val=process(parse(statement),global_env)
+                    if val is not None:
+                        print tostring(val)
+                except Exception as err:
+                    print "[error]%s"%(err,)
         
 if __name__=="__main__":
     repl()
