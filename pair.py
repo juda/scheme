@@ -12,8 +12,14 @@ class Pair:
     def cdr(self):
         return self.y
 
+def evalAppend(parameters):
+    now=parameters[-1]
+    for i in xrange(len(parameters)-2,-1,-1):
+        now=Append(parameters[i],now)
+    return now
+
 def Append(x,y):
-    if x==Pair.Nil:
+    if x==Pair.Nil or x==None:
         return y
     else:
         return cons(x.car(),Append(x.cdr(),y))

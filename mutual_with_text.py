@@ -1,5 +1,6 @@
 '''mutual with text'''
 import numbers
+from pair import *
 
 def parentheseBalance(statement):
     res=0
@@ -47,3 +48,22 @@ def tostring(exp):
         return '('+' '.join(map(tostring,exp))+')'
     else:
         return str(exp)
+
+def showPair(exp):
+    if exp==Pair.Nil or exp==None:
+        return ''
+    if isnumber(exp):
+        return transnumber(exp)
+    if isQuoted(exp):
+        return transQuoted(exp)
+    if isinstance(exp,str):
+        return exp
+    if isinstance(exp.car(),Pair):
+        res='(%s)'%(showPair(exp.car()),)
+    else:
+        res='%s'%(showPair(exp.car()),)
+    temp=showPair(exp.cdr())
+    if temp!='':
+        res+=' %s'%(temp,)
+    return res
+                          

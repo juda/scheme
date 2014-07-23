@@ -70,5 +70,8 @@ Implement a scheme Interpretation
 
 增加了对可变长参数的支持
 
+##2014/7/23
+实现了对list的打印，正确计算汉诺塔
+
 =======
 

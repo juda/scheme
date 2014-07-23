@@ -126,7 +126,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='list':
         return List(agruments)
     elif foo=='append':
-        return Append(agruments[0],agruments[1])
+        return len(agruments)>1 and evalAppend(agruments)
     elif foo=='list?':
            return len(agruments)==0 or (len(agruments)==1 and isinstance(agruments[0],Pair))
     elif foo=='null?':
@@ -197,6 +197,8 @@ def applyFunction(exp,env):
                         return applyPrimitiveObject(exp,env)
                 else:
                         foo=env.findObject(exp[0])
+                        if isinstance(foo,bool):
+                            raise Exception("Can't find this object")
     body,parameters=foo
     agruments=exp[1:]
     if not isMatch(parameters,agruments):

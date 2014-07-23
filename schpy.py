@@ -4,6 +4,7 @@ from global_dict import *
 from process import process
 from parse import *
 import pdb
+from pair import *
 
 def repl():
     '''read-eval-print-loop'''
@@ -36,7 +37,10 @@ def repl():
                     #pdb.set_trace()
                     val=process(parse(statement),global_env)
                     if val is not None:
-                        print tostring(val)
+                        if isinstance(val,Pair):
+                            print '(%s)'%(showPair(val),)
+                        else:
+                            print tostring(val)
                 except Exception as err:
                     print "[error]%s"%(err,)
         
