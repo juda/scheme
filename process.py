@@ -154,7 +154,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='list?':
            return len(agruments)==0 or (len(agruments)==1 and isinstance(agruments[0],Pair))
     elif foo=='null?':
-        return len(agruments)==1 and Length(agruments[0])==0
+        return len(agruments)==1 and agruments[0]==Pair.Nil
     elif foo=='symbol?':
         return len(agruments)==1 and isQuoted(agruments[0])
     elif foo=='display':
@@ -267,12 +267,14 @@ def process(exp,env):
     elif exp[0]=='cond':
         return condIf(exp,env)
     elif exp[0]=='quote':
+        if isinstance(exp[1],list):
+            return Pair.Nil
         return transQuoted(exp[1])
     elif exp[0]=='apply':
         return applyFunction(exp[1:],env)
     elif exp[0]=='QUOTE':
         if len(exp)==1:
-            return Pair()
+            return Pair.Nil
         return evalQuoted(exp[1:],env)
     else:
         return applyFunction(exp,env)

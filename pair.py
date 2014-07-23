@@ -1,7 +1,7 @@
 #-*-coding:utf8-*-
 
 class Pair:
-    Nil=None
+    Nil=(None,None)
     def __init__(self,x=None,y=None):
         self.x=x
         self.y=y
