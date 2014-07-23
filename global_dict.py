@@ -14,17 +14,20 @@ class mydict:
     def __init__(self,father=None):
         self.father=father
         self.object={}
+        if father==None:
+            self.addObject('#t',True)
+            self.addObject('#f',False)
 
     def findObject(self,name):
         if isinstance(name,list):
-            return
+            return None
         w=self
         while w!=None:
             if name in w.object:
                 return w.object[name]
             else:
                 w=w.father
-        return
+        return None
 
     def addObject(self,name,value):
         self.object[name]=value

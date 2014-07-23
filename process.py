@@ -9,7 +9,6 @@ import numbers
 from pair import *
 
 def selfEvaluating(exp):
-    #print exp[0]
     return (isnumber(exp) or isQuoted(exp))
 
 def isObject(exp,env):
@@ -27,7 +26,6 @@ def evalAssignment(exp,env):
 
 
 def evalDefinition(exp,env):
-    #print exp
     if len(exp)>3:
         temp=exp[2:]
     else:
@@ -84,40 +82,66 @@ def catch(command,alist):
 def applyPrimitiveFunction(foo,agruments):
     pattern=re.compile(r'c[a|d]+r')
     if foo=='+':
-           return reduce(op.add,agruments,0)
-    elif foo=='-':           
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
+        return reduce(op.add,agruments,0)
+    elif foo=='-':
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
         if len(agruments)==1:
             return -agruments[0]
         else:
-               return reduce(op.sub,agruments[1:],agruments[0])
+            return reduce(op.sub,agruments[1:],agruments[0])
     elif foo=='*':
-           return reduce(op.mul,agruments,1)
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
+        return reduce(op.mul,agruments,1)
     elif foo=='/':
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
         if isinstance(agruments[0],float):
             return reduce(op.div,agruments[1:],agruments[0])
         else:
             return reduce(op.div,agruments[1:],fractions.Fraction(agruments[0],1))
     elif foo=='not':
-           return not agruments[0]
+        return not agruments[0]
     elif foo=='modulo':
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
         return agruments[0]%agruments[1]
     elif foo=='>':
-           return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
+        return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
     elif foo=='<':
-           return reduce(op.and_,map(op.lt,agruments[:-1],agruments[1:]),True)
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
+        return reduce(op.and_,map(op.lt,agruments[:-1],agruments[1:]),True)
     elif foo=='>=':
-           return reduce(op.and_,map(op.ge,agruments[:-1],agruments[1:]),True)
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
+        return reduce(op.and_,map(op.ge,agruments[:-1],agruments[1:]),True)
     elif foo=='<=':
-           return reduce(op.and_,map(op.le,agruments[:-1],agruments[1:]),True)
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
+        return reduce(op.and_,map(op.le,agruments[:-1],agruments[1:]),True)
     elif foo=='=' or foo=='equal?':
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
         return reduce(op.and_,map(op.eq,agruments[:-1],agruments[1:]),True)
     elif foo=='eq?':
-           return reduce(op.and_,map(op.is_,agruments[:-1],agruments[1:]),True)
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
+        return reduce(op.and_,map(op.is_,agruments[:-1],agruments[1:]),True)
     elif foo=='length':
-           return Length(agruments[0])
+        return Length(agruments[0])
     elif foo=='and':
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
         return reduce(op.and_,map(op.and_,agruments[:-1],agruments[1:]),True)
     elif foo=='or':
+        if isinstance(agruments[0],Pair):
+            agruments=transList(agruments[0])
         return reduce(op.and_,map(op.or_,agruments[:-1],agruments[1:]),True)
     elif foo=='cons':
         if len(agruments)!=2:
@@ -143,7 +167,6 @@ def applyPrimitiveFunction(foo,agruments):
         return catch(foo[1:-1],agruments[0])
     else:
         raise NameError("Doesn't exist or lock of implementation this primitive Object %s"%(foo,))
-
 
 def isBaseFunctions(foo,env):
     if foo in env.BaseFunctions:
@@ -205,10 +228,9 @@ def applyFunction(exp,env):
         raise SyntaxError("Can't match the agruments and parameters")
     local_env=mydict(env)
     temp=len(agruments)
-    #print parameters,agruments
     for i in xrange(temp):
-        if parameters[i]=='.':
-            local_env.addObject(parameters[i+1],List(agruments[i:]))
+        if parameters[i]=='.':            
+            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,env),agruments[i:])))
             break
         local_env.addObject(parameters[i],process(agruments[i],env))
     return process(body,local_env)
@@ -223,8 +245,10 @@ def process(exp,env):
             return exp
         elif isQuoted(exp):
             return exp[1:]
-        else:
+        elif env.findObject(exp)!=None:
             return env.findObject(exp)
+        else:
+            return exp
     if isinstance(exp[0],list) and not isinstance(process(exp[0],env),tuple):
         return evalSequence(exp,env)
     if exp[0]=='set!':
@@ -244,6 +268,8 @@ def process(exp,env):
         return condIf(exp,env)
     elif exp[0]=='quote':
         return transQuoted(exp[1])
+    elif exp[0]=='apply':
+        return applyFunction(exp[1:],env)
     elif exp[0]=='QUOTE':
         if len(exp)==1:
             return Pair()

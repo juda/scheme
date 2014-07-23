@@ -73,5 +73,9 @@ Implement a scheme Interpretation
 ##2014/7/23
 实现了对list的打印，正确计算汉诺塔
 
+首先了apply过程，增加了底层操作符的重载版本
+
+发布了第一个不完全版本v1，代号unicorn
+
 =======
 

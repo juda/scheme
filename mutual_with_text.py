@@ -50,7 +50,7 @@ def tostring(exp):
         return str(exp)
 
 def showPair(exp):
-    if exp==Pair.Nil or exp==None:
+    if exp==Pair.Nil:
         return ''
     if isnumber(exp):
         return transnumber(exp)

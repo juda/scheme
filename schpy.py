@@ -39,6 +39,11 @@ def repl():
                     if val is not None:
                         if isinstance(val,Pair):
                             print '(%s)'%(showPair(val),)
+                        elif isinstance(val,bool):
+                            if val==True:
+                                print '#t'
+                            elif val==False:
+                                print '#f'
                         else:
                             print tostring(val)
                 except Exception as err:

@@ -1,7 +1,7 @@
 #-*-coding:utf8-*-
 
 class Pair:
-    Nil=(None,None)
+    Nil=None
     def __init__(self,x=None,y=None):
         self.x=x
         self.y=y
@@ -19,7 +19,7 @@ def evalAppend(parameters):
     return now
 
 def Append(x,y):
-    if x==Pair.Nil or x==None:
+    if x==Pair.Nil:
         return y
     else:
         return cons(x.car(),Append(x.cdr(),y))
@@ -41,3 +41,9 @@ def List(*args):
 def cons(x,y):
     return Pair(x,y)
 
+def transList(x):
+    res=[]
+    while x!=Pair.Nil and x.car()!=Pair.Nil:
+        res.append(x.car())
+        x=x.cdr()
+    return res
