@@ -215,6 +215,9 @@ def isMatch(para,agru):
 def applyFunction(exp,env):
     if isinstance(exp[0],list):
         foo=process(exp[0],env)
+        if isBaseFunctions(foo,env):
+            temp=[foo]+exp[1:]
+            return applyPrimitiveObject(temp,env)
     else:
                 if isBaseFunctions(exp[0],env):
                         return applyPrimitiveObject(exp,env)
@@ -235,6 +238,10 @@ def applyFunction(exp,env):
         local_env.addObject(parameters[i],process(agruments[i],env))
     return process(body,local_env)
 
+def isFunction(exp,env):
+    temp=process(exp,env)
+    return isBaseFunctions(temp,env) or  isinstance(temp,tuple)
+
 def process(exp,env):
     if not isinstance(exp,list):
         if isinstance(exp,numbers.Number):
@@ -249,7 +256,7 @@ def process(exp,env):
             return env.findObject(exp)
         else:
             return exp
-    if isinstance(exp[0],list) and not isinstance(process(exp[0],env),tuple):
+    if isinstance(exp[0],list) and not isFunction(exp[0],env):
         return evalSequence(exp,env)
     if exp[0]=='set!':
         evalAssignment(exp,env)

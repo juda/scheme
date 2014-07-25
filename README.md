@@ -77,5 +77,16 @@ Implement a scheme Interpretation
 
 发布了第一个不完全版本v1，代号unicorn
 
+##2014/7/25
+完善了当底层操作符号为对象时的处理
+
+    > (define (f x) (if (= x 0) + *))
+    > ((f 1) 3 4)
+    12
+    > ((f 0) 3 4)
+    7
+    
+
+
 =======
 
