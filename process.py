@@ -52,9 +52,7 @@ def evalSequence(exp,env):
 def evalQuoted(exp,env):
     res=Pair.Nil
     for i in xrange(len(exp)-1,-1,-1):
-        if isinstance(exp[i],list):
-            temp=process(exp[i],env)
-        elif isnumber(exp[i]):
+        if isnumber(exp[i]):
             temp=transnumber(exp[i])
         elif isQuoted(exp[i]):
             temp=transQuoted(exp[i])
@@ -145,6 +143,20 @@ def applyPrimitiveFunction(foo,agruments):
         return cons(agruments[0],agruments[1])
     elif foo=='list':
         return List(agruments)
+    elif foo=='quotient':
+        if len(agruments)!=2:
+            raise SyntaxError("the number of parameters of quotient is uncorrect")
+        if not isinstance(agruments[0],int) or not isinstance(agruments[1],int):
+            raise SyntaxError("at least one parameter isn't integer")
+        return agruments[0]/agruments[1]
+    elif foo=='number?':
+        if len(agruments)!=1:
+            raise SyntaxError("the number of parameter of number? is uncorrect")
+        return isnumber(agruments[0])
+    elif foo=='integer?':
+        if len(agruments)!=1:
+            raise SyntaxError("the number of parameter of integer? is uncorrect")
+        return isinstance(agruments[0],numbers.Number) and agruments[0]==int(agruments[0])
     elif foo=='append':
         return len(agruments)>1 and evalAppend(agruments)
     elif foo=='list?':
@@ -154,7 +166,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='symbol?':
         return len(agruments)==1 and isQuoted(agruments[0])
     elif foo=='display':
-        print tostring(agruments[0])
+        print display(agruments[0])
     elif foo=='pair?':
         return len(agruments)==1 and agruments[0]!=Pair.Nil and isinstance(agruments[0],Pair)
     elif foo=='newline':
@@ -261,9 +273,15 @@ def evalOr(exp,env):
 def evalEqv(obj1,obj2,env):
     obj1=process(obj1,env)
     obj2=process(obj2,env)
-    if obj1==obj2:
-        return True
-    return False
+    return obj1 is obj2
+
+def evalEqual(obj1,obj2,env):
+    obj1=process(obj1,env)
+    obj2=process(obj2,env)
+    if isinstance(obj1,Pair) and isinstance(obj2,Pair):
+        return pairEqual(obj1,obj2)
+    else:
+        return obj1==obj2
 
 def process(exp,env):
     if not isinstance(exp,list):
@@ -303,7 +321,7 @@ def process(exp,env):
     elif exp[0]=='eqv?' or exp[0]=='eq?':
         return evalEqv(exp[1],exp[2],env)
     elif exp[0]=='equal?':
-        return evalEqueal(exp[1],exp[2],env)
+        return evalEqual(exp[1],exp[2],env)
     elif exp[0]=='quote':
         if isinstance(exp[1],list):
             return Pair.Nil

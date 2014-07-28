@@ -80,7 +80,10 @@ Implement a scheme Interpretation
     > ((f 0) 3 4)
     7
     
+##2014/7/28
+增加了若干底层函数，把and和or当成语法结构进行短路求值
 
+增加了文件处理，修复了若干bug
 
 =======
 

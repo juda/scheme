@@ -58,6 +58,8 @@ def showPair(exp):
         return transQuoted(exp)
     if isinstance(exp,str):
         return exp
+    if isinstance(exp,list):
+        return tostring(exp)
     if isinstance(exp.car(),Pair):
         res='(%s)'%(showPair(exp.car()),)
     else:
@@ -67,3 +69,14 @@ def showPair(exp):
         res+=' %s'%(temp,)
     return res
                           
+def display(val):
+    if val is not None:
+        if isinstance(val,Pair):
+            print '(%s)'%(showPair(val),)
+        elif isinstance(val,bool):
+            if val==True:
+                print '#t'
+            elif val==False:
+                print '#f'
+        else:
+            print tostring(val)

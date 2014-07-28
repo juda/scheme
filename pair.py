@@ -47,3 +47,10 @@ def transList(x):
         res.append(x.car())
         x=x.cdr()
     return res
+
+def pairEqual(obj1,obj2):
+    if obj1==obj2:
+        return True
+    if isinstance(obj1,Pair) and isinstance(obj2,Pair):
+        return pairEqual(obj1.car(),obj2.car()) and pairEqual(obj1.cdr(),obj2.cdr())
+    return False

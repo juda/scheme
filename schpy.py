@@ -6,6 +6,7 @@ from process import process
 from parse import *
 import pdb
 from pair import *
+import sys
 
 def repl():
     '''read-eval-print-loop'''
@@ -31,24 +32,56 @@ def repl():
                     print transnumber(statement)
                 elif isQuoted(statement):
                     print statement[1:]
+                elif global_env.findObject(statement):
+                    display(global_env.findObject(statement))
                 else:
-                    print tostring(global_env.findObject(statement))
+                    print tostring(statement)
             else:
                 try:
                     #pdb.set_trace()
                     val=process(parse(statement),global_env)
-                    if val is not None:
-                        if isinstance(val,Pair):
-                            print '(%s)'%(showPair(val),)
-                        elif isinstance(val,bool):
-                            if val==True:
-                                print '#t'
-                            elif val==False:
-                                print '#f'
-                        else:
-                            print tostring(val)
+                    display(val)
                 except Exception as err:
                     print "[error]%s"%(err,)
+
+def runFile():
+    global_env=mydict()
+    f=open(sys.argv[1])
+    statement=''
+    for buff in f.xreadlines():
+        statement+=buff
+        if not parentheseBalance(statement):
+            continue
+        statement=statement.split(';')[0]
+        if statement=='exit':
+            f.close()
+            exit(0)
+        else:
+            if statement:
+                if statement[0]!='(':
+                    if isnumber(statement):
+                        print transnumber(statement)
+                    elif isQuoted(statement):
+                        print statement[1:]
+                    elif global_env.findObject(statement):
+                        display(global_env.findObject(statement))
+                    else:
+                        print tostring(statement)
+                else:
+                    try:
+                        #pdb.set_trace()
+                        val=process(parse(statement),global_env)
+                        display(val)
+                    except Exception as err:
+                        print "[error]%s"%(err,)
+        statement=''
         
 if __name__=="__main__":
-    repl()
+    if len(sys.argv)==1:
+        print "[mode]shell"
+        repl()
+    elif len(sys.argv)==2:
+        print "[mode]file"
+        runFile()
+    else:
+        print "<usage> python schpy.py [file]"

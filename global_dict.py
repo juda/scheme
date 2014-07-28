@@ -7,7 +7,7 @@ import math
 
 class mydict:
     BaseFunctions=('+','-','*','/','not','modulo','>','<','>=','<=',
-                  '=','length','cons','list',
+                  '=','length','cons','list','number?','integer?','quotient',
                    'append','list?','null?','pair?',
                   'symbol?','display','newline')
     
