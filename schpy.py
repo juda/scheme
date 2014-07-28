@@ -1,4 +1,5 @@
-#!/usr/bin/python2
+#!/usr/bin/python
+
 from mutual_with_text import *
 from global_dict import *
 from process import process

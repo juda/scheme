@@ -33,7 +33,7 @@ def Length(x):
 def List(*args):
     if len(args[0])==0:
         return Pair.Nil
-    now=None
+    now=Pair.Nil
     for i in xrange(len(args[0])-1,-1,-1):
         now=cons(args[0][i],now)
     return now

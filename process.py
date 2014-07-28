@@ -79,6 +79,14 @@ def catch(command,alist):
     else:
         return catch(command[:-1],alist.cdr())
 
+def isList(exp):
+    if exp==Pair.Nil:
+        return True
+    try:
+        return isList(exp.cdr())
+    except:
+        return False
+
 def applyPrimitiveFunction(foo,agruments):
     pattern=re.compile(r'c[a|d]+r')
     if foo=='+':
@@ -125,24 +133,12 @@ def applyPrimitiveFunction(foo,agruments):
         if isinstance(agruments[0],Pair):
             agruments=transList(agruments[0])
         return reduce(op.and_,map(op.le,agruments[:-1],agruments[1:]),True)
-    elif foo=='=' or foo=='equal?':
+    elif foo=='=':
         if isinstance(agruments[0],Pair):
             agruments=transList(agruments[0])
-        return reduce(op.and_,map(op.eq,agruments[:-1],agruments[1:]),True)
-    elif foo=='eq?':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
-        return reduce(op.and_,map(op.is_,agruments[:-1],agruments[1:]),True)
+        return reduce(op.eq,map(op.eq,agruments[:-1],agruments[1:]),True)
     elif foo=='length':
         return Length(agruments[0])
-    elif foo=='and':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
-        return reduce(op.and_,map(op.and_,agruments[:-1],agruments[1:]),True)
-    elif foo=='or':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
-        return reduce(op.and_,map(op.or_,agruments[:-1],agruments[1:]),True)
     elif foo=='cons':
         if len(agruments)!=2:
             raise SyntaxError("the number of parameters of cons is uncorrect")
@@ -152,13 +148,15 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='append':
         return len(agruments)>1 and evalAppend(agruments)
     elif foo=='list?':
-           return len(agruments)==0 or (len(agruments)==1 and isinstance(agruments[0],Pair))
+           return len(agruments)==1 and isList(agruments[0])
     elif foo=='null?':
         return len(agruments)==1 and agruments[0]==Pair.Nil
     elif foo=='symbol?':
         return len(agruments)==1 and isQuoted(agruments[0])
     elif foo=='display':
         print tostring(agruments[0])
+    elif foo=='pair?':
+        return len(agruments)==1 and agruments[0]!=Pair.Nil and isinstance(agruments[0],Pair)
     elif foo=='newline':
         print
     elif pattern.match(foo)!=None and foo==foo[pattern.match(foo).start():pattern.match(foo).end()]:
@@ -242,6 +240,31 @@ def isFunction(exp,env):
     temp=process(exp,env)
     return isBaseFunctions(temp,env) or  isinstance(temp,tuple)
 
+def evalAnd(exp,env):
+    temp=process(exp[0],env)
+    if temp==False:
+        return False
+    else:
+        if len(exp)==1:
+            return temp
+        return evalAnd(exp[1:],env)
+
+def evalOr(exp,env):
+    temp=process(exp[0],env)
+    if temp==True:
+        return True
+    else:
+        if len(exp)==1:
+            return temp
+        return evalOr(exp[1:],env)
+
+def evalEqv(obj1,obj2,env):
+    obj1=process(obj1,env)
+    obj2=process(obj2,env)
+    if obj1==obj2:
+        return True
+    return False
+
 def process(exp,env):
     if not isinstance(exp,list):
         if isinstance(exp,numbers.Number):
@@ -273,6 +296,14 @@ def process(exp,env):
         return evalSequence(exp[1:],env)
     elif exp[0]=='cond':
         return condIf(exp,env)
+    elif exp[0]=='and':
+        return evalAnd(exp[1:],env)
+    elif exp[0]=='or':
+        return evalOr(exp[1:],env)
+    elif exp[0]=='eqv?' or exp[0]=='eq?':
+        return evalEqv(exp[1],exp[2],env)
+    elif exp[0]=='equal?':
+        return evalEqueal(exp[1],exp[2],env)
     elif exp[0]=='quote':
         if isinstance(exp[1],list):
             return Pair.Nil
