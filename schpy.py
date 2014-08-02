@@ -38,7 +38,7 @@ def repl():
                     print tostring(statement)
             else:
                 try:
-                    #pdb.set_trace()
+                    pdb.set_trace()
                     val=process(parse(statement),global_env)
                     display(val)
                 except Exception as err:

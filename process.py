@@ -166,7 +166,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='symbol?':
         return len(agruments)==1 and isQuoted(agruments[0])
     elif foo=='display':
-        print display(agruments[0])
+        display(agruments[0])
     elif foo=='pair?':
         return len(agruments)==1 and agruments[0]!=Pair.Nil and isinstance(agruments[0],Pair)
     elif foo=='newline':
@@ -179,6 +179,8 @@ def applyPrimitiveFunction(foo,agruments):
         raise NameError("Doesn't exist or lock of implementation this primitive Object %s"%(foo,))
 
 def isBaseFunctions(foo,env):
+    if not isinstance(foo,str):
+        return False
     if foo in env.BaseFunctions:
         return True
     pattern=re.compile(r'c[a|d]+r')
@@ -283,6 +285,24 @@ def evalEqual(obj1,obj2,env):
     else:
         return obj1==obj2
 
+def evalLetstar(blinding,body,env):
+    local_env=mydict(env)
+    for i in blinding:
+        evalDefinition(['define']+i,local_env)
+    return process(body,local_env)
+
+def evalLet(blinding,body,env):
+    foo=['lambda']
+    para=[]
+    var=[]
+    for i in blinding:
+        var.append(i[0])
+        para.append(i[1])
+    foo.append(var)
+    foo.append(body)
+    return process([foo]+para,env)
+    
+
 def process(exp,env):
     if not isinstance(exp,list):
         if isinstance(exp,numbers.Number):
@@ -322,6 +342,12 @@ def process(exp,env):
         return evalEqv(exp[1],exp[2],env)
     elif exp[0]=='equal?':
         return evalEqual(exp[1],exp[2],env)
+    elif exp[0]=='let':
+        return evalLet(exp[1],exp[2],env)
+    elif exp[0]=='let*':
+        return evalLetstar(exp[1],exp[2],env)
+    elif exp[0]=='letrec':
+        pass
     elif exp[0]=='quote':
         if isinstance(exp[1],list):
             return Pair.Nil
