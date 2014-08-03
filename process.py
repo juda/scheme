@@ -41,8 +41,8 @@ def evalIf(exp,env):
     else:
         return process(exp[3],env)
 
-def makeObject(para,body):
-    return (body,para)
+def makeObject(para,body,env):
+    return (body,para,env)
 
 def evalSequence(exp,env):
     for i in exp:
@@ -84,6 +84,19 @@ def isList(exp):
         return isList(exp.cdr())
     except:
         return False
+
+def listref(List,k):
+    temp=List
+    for i in xrange(k):
+        temp=temp.cdr()
+    return temp.car()
+
+def evalmemq(obj,List):
+    temp=List
+    while temp!=Pair.Nil:
+        if EvalEqv(temp.car(),obj):
+            return temp.cdr()
+    return False
 
 def applyPrimitiveFunction(foo,agruments):
     pattern=re.compile(r'c[a|d]+r')
@@ -167,6 +180,10 @@ def applyPrimitiveFunction(foo,agruments):
         return len(agruments)==1 and isQuoted(agruments[0])
     elif foo=='display':
         display(agruments[0])
+    elif foo=='list-ref':
+        return listref(agruments[0],agruments[1])
+    elif foo=='memq':
+        return evalmemq(agruments[0],agurments[1])
     elif foo=='pair?':
         return len(agruments)==1 and agruments[0]!=Pair.Nil and isinstance(agruments[0],Pair)
     elif foo=='newline':
@@ -235,19 +252,21 @@ def applyFunction(exp,env):
                         return applyPrimitiveObject(exp,env)
                 else:
                         foo=env.findObject(exp[0])
+                        if not isinstance(foo,tuple):
+                            foo=process(foo,env)
                         if isinstance(foo,bool):
                             raise Exception("Can't find this object")
-    body,parameters=foo
+    body,parameters,ENV=foo
     agruments=exp[1:]
     if not isMatch(parameters,agruments):
         raise SyntaxError("Can't match the agruments and parameters")
-    local_env=mydict(env)
+    local_env=mydict(ENV)
     temp=len(agruments)
     for i in xrange(temp):
         if parameters[i]=='.':            
-            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,env),agruments[i:])))
+            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,ENV),agruments[i:])))
             break
-        local_env.addObject(parameters[i],process(agruments[i],env))
+        local_env.addObject(parameters[i],process(agruments[i],ENV))
     return process(body,local_env)
 
 def isFunction(exp,env):
@@ -294,7 +313,7 @@ def evalLetstar(blinding,body,env):
 def evalLetrec(blinding,body,env):
     local_env=mydict(env)
     for i in blinding:
-        local_env.addObject(i[0],process(i[1],env))
+        local_env.addObject(i[0],i[1])
     return process(body,local_env)
 
 def evalLet(blinding,body,env):
@@ -333,9 +352,9 @@ def process(exp,env):
         return evalIf(exp,env)
     elif exp[0]=='lambda':
         if len(exp)>3:
-            return makeObject(exp[1],exp[2:])
+            return makeObject(exp[1],exp[2:],env)
         else:
-            return makeObject(exp[1],exp[2])
+            return makeObject(exp[1],exp[2],env)
     elif exp[0]=='begin':
         return evalSequence(exp[1:],env)
     elif exp[0]=='cond':
