@@ -88,5 +88,7 @@ Implement a scheme Interpretation
 ##2014/8/3
 实现了let绑定，包括let,let*,letrec
 
+修改了一些底层操作的实现，增加若干底层操作
+
 =======
 

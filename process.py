@@ -56,6 +56,8 @@ def evalQuoted(exp,env):
             temp=transnumber(exp[i])
         elif isQuoted(exp[i]):
             temp=transQuoted(exp[i])
+        elif isinstance(exp[i],list):
+            temp=evalQuoted(exp[i],env)
         else:
             temp=exp[i]
         res=cons(temp,res)
@@ -91,11 +93,22 @@ def listref(List,k):
         temp=temp.cdr()
     return temp.car()
 
-def evalmemq(obj,List):
+def evalmemq(obj,List,env):
     temp=List
     while temp!=Pair.Nil:
-        if EvalEqv(temp.car(),obj):
-            return temp.cdr()
+        if evalEqv(temp.car(),obj,env):
+            return temp
+        else:
+            temp=temp.cdr()
+    return False
+
+def evalassq(obj,alist,env):
+    temp=alist
+    while temp!=Pair.Nil:
+        if evalEqv(temp.car().car(),obj,env):
+            return temp.car()
+        else:
+            temp=temp.cdr()
     return False
 
 def applyPrimitiveFunction(foo,agruments):
@@ -183,7 +196,9 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='list-ref':
         return listref(agruments[0],agruments[1])
     elif foo=='memq':
-        return evalmemq(agruments[0],agurments[1])
+        return evalmemq(agruments[0],agruments[1],mydict())
+    elif foo=='assq':
+        return evalassq(agruments[0],agruments[1],mydict())
     elif foo=='pair?':
         return len(agruments)==1 and agruments[0]!=Pair.Nil and isinstance(agruments[0],Pair)
     elif foo=='newline':
@@ -270,8 +285,13 @@ def applyFunction(exp,env):
     return process(body,local_env)
 
 def isFunction(exp,env):
-    temp=process(exp,env)
-    return isBaseFunctions(temp,env) or  isinstance(temp,tuple)
+    if exp[0]=='lambda':
+        return True
+    if exp[0]=='define' and isinstance(exp[1],list):
+        return True
+    if isinstance(env.findObject(exp[0]),tuple):
+        return True
+    return False
 
 def evalAnd(exp,env):
     temp=process(exp[0],env)
@@ -294,6 +314,14 @@ def evalOr(exp,env):
 def evalEqv(obj1,obj2,env):
     obj1=process(obj1,env)
     obj2=process(obj2,env)
+    if isinstance(obj1,str) and isinstance(obj2,str) and obj1[:2]=='#\\' and obj2[:2]=='#\\':
+        return obj1==obj2
+    if isQuoted(obj1) and isQuoted(obj2):
+        return obj1==obj2
+    if isnumber(obj1) and isNumber(obj2):
+        return obj1==obj2
+    if isinstance(obj1,str) and isinstance(obj2,str) and obj1[0]!='"':
+        return obj1==obj2
     return obj1 is obj2
 
 def evalEqual(obj1,obj2,env):
@@ -368,11 +396,11 @@ def process(exp,env):
     elif exp[0]=='equal?':
         return evalEqual(exp[1],exp[2],env)
     elif exp[0]=='let':
-        return evalLet(exp[1],exp[2],env)
+        return evalLet(exp[1],exp[2:],env)
     elif exp[0]=='let*':
-        return evalLetstar(exp[1],exp[2],env)
+        return evalLetstar(exp[1],exp[2:],env)
     elif exp[0]=='letrec':
-        return evalLetrec(exp[1],exp[2],env)
+        return evalLetrec(exp[1],exp[2:],env)
     elif exp[0]=='quote':
         if isinstance(exp[1],list):
             return Pair.Nil
