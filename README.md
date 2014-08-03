@@ -85,5 +85,8 @@ Implement a scheme Interpretation
 
 增加了文件处理，修复了若干bug
 
+##2014/8/3
+实现了let绑定，包括let,let*,letrec
+
 =======
 

@@ -288,7 +288,13 @@ def evalEqual(obj1,obj2,env):
 def evalLetstar(blinding,body,env):
     local_env=mydict(env)
     for i in blinding:
-        evalDefinition(['define']+i,local_env)
+        local_env.addObject(i[0],process(i[1],local_env))
+    return process(body,local_env)
+
+def evalLetrec(blinding,body,env):
+    local_env=mydict(env)
+    for i in blinding:
+        local_env.addObject(i[0],process(i[1],env))
     return process(body,local_env)
 
 def evalLet(blinding,body,env):
@@ -347,7 +353,7 @@ def process(exp,env):
     elif exp[0]=='let*':
         return evalLetstar(exp[1],exp[2],env)
     elif exp[0]=='letrec':
-        pass
+        return evalLetrec(exp[1],exp[2],env)
     elif exp[0]=='quote':
         if isinstance(exp[1],list):
             return Pair.Nil
