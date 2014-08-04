@@ -11,16 +11,6 @@ from pair import *
 def selfEvaluating(exp):
     return (isnumber(exp) or isQuoted(exp))
 
-def isObject(exp,env):
-    try:
-        return  isinstance(exp,str) and env.findObject(exp)!=None
-    except:
-        return False
-
-
-def isstring(exp):
-    return len(exp)>1 and exp[0]=='"' and exp[-1]=='"' 
-
 def evalAssignment(exp,env):
     env.setObject(exp[1],exp[2])
 
@@ -220,16 +210,9 @@ def isBaseFunctions(foo,env):
         return True
     return False
 
-def preProcess(exp,env):
-    if isinstance(exp,list):
-           return process(exp,env)
-    else:
-           return exp
-
 def applyPrimitiveObject(body,env):
     foo=body[0]
-    local_env=mydict(env)
-    parameters=map(lambda x:preProcess(x,local_env),body[1:])
+    parameters=map(lambda x:process(x,env),body[1:])
     agruments=[]
     for i in parameters:
         if isinstance(i,int):
@@ -264,29 +247,26 @@ def applyFunction(exp,env):
             return applyPrimitiveObject(temp,env)
     else:
                 if isBaseFunctions(exp[0],env):
-                        return applyPrimitiveObject(exp,env)
+                    return applyPrimitiveObject(exp,env)
                 else:
-                        foo=env.findObject(exp[0])
-                        if not isinstance(foo,tuple):
-                            foo=process(foo,env)
-                        if isinstance(foo,bool):
-                            raise Exception("Can't find this object")
+                    foo=env.findObject(exp[0])
+                    if not isinstance(foo,tuple):
+                        foo=process(foo,env)
+                    if isinstance(foo,bool):
+                        raise Exception("Can't find this object")
     if not isinstance(foo,tuple):
         return foo
     body,parameters,ENV=foo
     agruments=exp[1:]
-    if not isMatch(parameters,agruments):
-        raise SyntaxError("Can't match the agruments and parameters")
-    local_env=mydict(env)
-    local_env.update(ENV)
-    #if not isinstance(exp[0],list):
-        #local_env.addObject(exp[0],(body,parameters,local_env))
+    local_env=mydict(ENV)
+    if not isinstance(exp[0],list):
+    	local_env.addObject(exp[0],makeObject(parameters,body,local_env))
     temp=len(agruments)
     for i in xrange(temp):
         if parameters[i]=='.':            
-            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,local_env),agruments[i:])))
+            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,env),agruments[i:])))
             break
-        local_env.addObject(parameters[i],process(agruments[i],local_env))
+        local_env.addObject(parameters[i],process(agruments[i],env))
     return process(body,local_env)
 
 def isFunction(exp,env):
@@ -322,9 +302,11 @@ def evalEqv(obj1,obj2,env):
     if isinstance(obj1,str) and isinstance(obj2,str) and obj1[:2]=='#\\' and obj2[:2]=='#\\':
         return obj1==obj2
     if isQuoted(obj1) and isQuoted(obj2):
-        return obj1==obj2
+        return obj1.lower()==obj2.lower()
     if isnumber(obj1) and isnumber(obj2):
         return obj1==obj2
+    if isstring(obj1) and isstring(obj2):
+    	return obj1==obj2
     if isinstance(obj1,str) and isinstance(obj2,str) and obj1[0]!='"':
         return obj1==obj2
     return obj1 is obj2
@@ -335,7 +317,7 @@ def evalEqual(obj1,obj2,env):
     if isinstance(obj1,Pair) and isinstance(obj2,Pair):
         return pairEqual(obj1,obj2)
     else:
-        return obj1==obj2
+        return evalEqv(obj1,obj2,env)
 
 def evalLetstar(blinding,body,env):
     local_env=mydict(env)
@@ -370,7 +352,7 @@ def process(exp,env):
         elif isstring(exp):
             return exp
         elif isQuoted(exp):
-            return exp[1:]
+            return exp
         elif env.findObject(exp)!=None:
             return env.findObject(exp)
         else:

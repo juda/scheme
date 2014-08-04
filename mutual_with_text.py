@@ -29,6 +29,16 @@ def isnumber(number):
 def isQuoted(exp):
     return isinstance(exp,str) and exp[0]=="'"
 
+def isObject(exp,env):
+    try:
+        return  isinstance(exp,str) and env.findObject(exp)!=None
+    except:
+        return False
+
+
+def isstring(exp):
+    return isinstance(exp,str) and len(exp)>1 and exp[0]=='"' and exp[-1]=='"' 
+
 def transQuoted(exp):
     if isQuoted(exp):
         return exp

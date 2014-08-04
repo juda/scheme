@@ -39,9 +39,10 @@ def repl():
             else:
                 try:
                     #pdb.set_trace()
-                    val=process(parse(statement),global_env)
+                    temp=parse(statement)
+                    val=process(temp,global_env)
                     display(val)
-                except IOError as err:
+                except Exception as err:
                     print "[error]%s"%(err,)
 
 def runFile():

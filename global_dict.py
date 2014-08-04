@@ -19,7 +19,7 @@ class mydict:
             self.addObject('#f',False)
 
     def findObject(self,name):
-        if isinstance(name,list):
+        if isinstance(name,list) or isinstance(name,tuple):
             return None
         w=self
         while w!=None:
