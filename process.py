@@ -31,7 +31,7 @@ def evalDefinition(exp,env):
     else:
         temp=exp[2]
     if isinstance(exp[1],list):        
-        env.object[exp[1][0]]=makeObject(exp[1][1:],temp)
+        env.object[exp[1][0]]=makeObject(exp[1][1:],temp,env)
     else:
         env.addObject(exp[1],process(temp,env))
 
@@ -271,17 +271,22 @@ def applyFunction(exp,env):
                             foo=process(foo,env)
                         if isinstance(foo,bool):
                             raise Exception("Can't find this object")
+    if not isinstance(foo,tuple):
+        return foo
     body,parameters,ENV=foo
     agruments=exp[1:]
     if not isMatch(parameters,agruments):
         raise SyntaxError("Can't match the agruments and parameters")
-    local_env=mydict(ENV)
+    local_env=mydict(env)
+    local_env.update(ENV)
+    #if not isinstance(exp[0],list):
+        #local_env.addObject(exp[0],(body,parameters,local_env))
     temp=len(agruments)
     for i in xrange(temp):
         if parameters[i]=='.':            
-            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,ENV),agruments[i:])))
+            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,local_env),agruments[i:])))
             break
-        local_env.addObject(parameters[i],process(agruments[i],ENV))
+        local_env.addObject(parameters[i],process(agruments[i],local_env))
     return process(body,local_env)
 
 def isFunction(exp,env):
@@ -318,7 +323,7 @@ def evalEqv(obj1,obj2,env):
         return obj1==obj2
     if isQuoted(obj1) and isQuoted(obj2):
         return obj1==obj2
-    if isnumber(obj1) and isNumber(obj2):
+    if isnumber(obj1) and isnumber(obj2):
         return obj1==obj2
     if isinstance(obj1,str) and isinstance(obj2,str) and obj1[0]!='"':
         return obj1==obj2

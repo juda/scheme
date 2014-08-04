@@ -41,3 +41,7 @@ class mydict:
             else:
                 w=w.father
         raise NameError("Doesn't Exist the variable %s"%(name,))
+
+    def update(self,x):
+        for i in x.object.iteritems():
+            self.object[i[0]]=i[1]

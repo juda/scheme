@@ -41,7 +41,7 @@ def repl():
                     #pdb.set_trace()
                     val=process(parse(statement),global_env)
                     display(val)
-                except Exception as err:
+                except IOError as err:
                     print "[error]%s"%(err,)
 
 def runFile():
