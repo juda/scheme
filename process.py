@@ -8,6 +8,7 @@ import fractions
 import numbers
 from pair import *
 
+
 def selfEvaluating(exp):
     return (isnumber(exp) or isQuoted(exp))
 
@@ -40,7 +41,7 @@ def evalSequence(exp,env):
     return temp
 
 def evalQuoted(exp,env):
-    res=Pair.Nil
+    res=Nil
     for i in xrange(len(exp)-1,-1,-1):
         if isnumber(exp[i]):
             temp=transnumber(exp[i])
@@ -70,7 +71,7 @@ def catch(command,alist):
         return catch(command[:-1],alist.cdr())
 
 def isList(exp):
-    if exp==Pair.Nil:
+    if exp==Nil:
         return True
     try:
         return isList(exp.cdr())
@@ -85,7 +86,7 @@ def listref(List,k):
 
 def evalmemq(obj,List,env):
     temp=List
-    while temp!=Pair.Nil:
+    while temp!=Nil:
         if evalEqv(temp.car(),obj,env):
             return temp
         else:
@@ -94,7 +95,7 @@ def evalmemq(obj,List,env):
 
 def evalassq(obj,alist,env):
     temp=alist
-    while temp!=Pair.Nil:
+    while temp!=Nil:
         if evalEqv(temp.car().car(),obj,env):
             return temp.car()
         else:
@@ -170,7 +171,7 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='list?':
     	return isList(agruments.car())
     elif foo=='null?':
-        return agruments.car()==Pair.Nil
+        return agruments.car()==Nil
     elif foo=='symbol?':
         return isQuoted(agruments.car())
     elif foo=='display':
@@ -185,7 +186,7 @@ def applyPrimitiveFunction(foo,agruments):
     	agruments=transList(agruments)
         return evalassq(agruments[0],agruments[1],mydict())
     elif foo=='pair?':
-        return agruments.car()!=Pair.Nil and isinstance(agruments.car(),Pair)
+        return agruments.car()!=Nil and isinstance(agruments.car(),Pair)
     elif foo=='newline':
         print
     elif pattern.match(foo)!=None and foo==foo[pattern.match(foo).start():pattern.match(foo).end()]:
@@ -323,13 +324,23 @@ def evalLet(blinding,body,env):
     return temp
 
 def evalMap(fun,lst,env):
-	lst=process(lst,env)
-	if isinstance(lst,Pair):
-		lst=transList(lst)
-	res=[]
+	lsts=[]
 	for i in lst:
-		res.append(applyFunction([fun,i],env))
+		lsts.append(transList(process(i,env)))
+	l=len(lsts[0])
+	res=[]
+	for i in xrange(l):
+		temp=[]
+		for j in lsts:
+			temp.append(j[i])
+		res.append(applyFunction([fun]+temp,env))
 	return List(res)
+
+
+def evalApply(fun,lst,env):
+	fun=process(fun,env)
+	lst=process(lst,env)
+	return applyFunction([fun]+transList(lst),env)
 
 def process(exp,env):
     if not isinstance(exp,list):
@@ -378,15 +389,15 @@ def process(exp,env):
         return evalLetrec(exp[1],exp[2:],env)
     elif exp[0]=='quote':
         if isinstance(exp[1],list):
-            return Pair.Nil
+            return Nil
         return transQuoted(exp[1])
     elif exp[0]=='apply':
-        return applyFunction(exp[1:],env)
+        return evalApply(exp[1],exp[2],env)
     elif exp[0]=='map':
-    	return evalMap(exp[1],exp[2],env)
+    	return evalMap(exp[1],exp[2:],env)
     elif exp[0]=='QUOTE':
         if len(exp)==1:
-            return Pair.Nil
+            return Nil
         return evalQuoted(exp[1:],env)
     else:
         return applyFunction(exp,env)

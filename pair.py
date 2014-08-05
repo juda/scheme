@@ -1,7 +1,6 @@
 #-*-coding:utf8-*-
 
 class Pair:
-    Nil=(None,None)
     def __init__(self,x=None,y=None):
         self.x=x
         self.y=y
@@ -12,6 +11,8 @@ class Pair:
     def cdr(self):
         return self.y
 
+Nil=Pair()
+
 def evalAppend(parameters):
     if isinstance(parameters,Pair):
         parameters=transList(parameters)
@@ -21,21 +22,21 @@ def evalAppend(parameters):
     return now
 
 def Append(x,y):
-    if x==Pair.Nil:
+    if x==Nil:
         return y
     else:
         return cons(x.car(),Append(x.cdr(),y))
 
 def Length(x):
-    if x==Pair.Nil:
+    if x==Nil:
         return 0
     else:
         return 1+Length(x.cdr())
 
 def List(*args):
     if len(args[0])==0:
-        return Pair.Nil
-    now=Pair.Nil
+        return Nil
+    now=Nil
     for i in xrange(len(args[0])-1,-1,-1):
         now=cons(args[0][i],now)
     return now
@@ -45,7 +46,7 @@ def cons(x,y):
 
 def transList(x):
     res=[]
-    while x!=Pair.Nil and x.car()!=None:
+    while x!=Nil and x.car()!=None:
         res.append(x.car())
         x=x.cdr()
     return res
