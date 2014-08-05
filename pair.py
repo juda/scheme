@@ -13,6 +13,8 @@ class Pair:
         return self.y
 
 def evalAppend(parameters):
+    if isinstance(parameters,Pair):
+        parameters=transList(parameters)
     now=parameters[-1]
     for i in xrange(len(parameters)-2,-1,-1):
         now=Append(parameters[i],now)
@@ -43,7 +45,7 @@ def cons(x,y):
 
 def transList(x):
     res=[]
-    while x!=Pair.Nil and x.car()!=Pair.Nil:
+    while x!=Pair.Nil and x.car()!=None:
         res.append(x.car())
         x=x.cdr()
     return res

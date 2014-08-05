@@ -104,99 +104,92 @@ def evalassq(obj,alist,env):
 def applyPrimitiveFunction(foo,agruments):
     pattern=re.compile(r'c[a|d]+r')
     if foo=='+':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return reduce(op.add,agruments,0)
     elif foo=='-':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         if len(agruments)==1:
             return -agruments[0]
         else:
             return reduce(op.sub,agruments[1:],agruments[0])
     elif foo=='*':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return reduce(op.mul,agruments,1)
     elif foo=='/':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         if isinstance(agruments[0],float):
             return reduce(op.div,agruments[1:],agruments[0])
         else:
             return reduce(op.div,agruments[1:],fractions.Fraction(agruments[0],1))
     elif foo=='not':
-        return not agruments[0]
+        return not agruments.car()
     elif foo=='modulo':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return agruments[0]%agruments[1]
     elif foo=='>':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return reduce(op.and_,map(op.gt,agruments[:-1],agruments[1:]),True)
     elif foo=='<':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return reduce(op.and_,map(op.lt,agruments[:-1],agruments[1:]),True)
     elif foo=='>=':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return reduce(op.and_,map(op.ge,agruments[:-1],agruments[1:]),True)
     elif foo=='<=':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return reduce(op.and_,map(op.le,agruments[:-1],agruments[1:]),True)
     elif foo=='=':
-        if isinstance(agruments[0],Pair):
-            agruments=transList(agruments[0])
+    	agruments=transList(agruments)
         return reduce(op.eq,map(op.eq,agruments[:-1],agruments[1:]),True)
     elif foo=='length':
-        return Length(agruments[0])
+        return Length(agruments.car())
     elif foo=='cons':
-        if len(agruments)!=2:
-            raise SyntaxError("the number of parameters of cons is uncorrect")
-        return cons(agruments[0],agruments[1])
+        return cons(agruments.car(),agruments.cdr().car())
     elif foo=='list':
-        return List(agruments)
+        return agruments
     elif foo=='quotient':
+    	agruments=transList(agruments)
         if len(agruments)!=2:
             raise SyntaxError("the number of parameters of quotient is uncorrect")
         if not isinstance(agruments[0],int) or not isinstance(agruments[1],int):
             raise SyntaxError("at least one parameter isn't integer")
         return agruments[0]/agruments[1]
     elif foo=='number?':
+    	agruments=transList(agruments)
         if len(agruments)!=1:
             raise SyntaxError("the number of parameter of number? is uncorrect")
         return isnumber(agruments[0])
     elif foo=='integer?':
+    	agruments=transList(agruments)
         if len(agruments)!=1:
             raise SyntaxError("the number of parameter of integer? is uncorrect")
         return isinstance(agruments[0],numbers.Number) and agruments[0]==int(agruments[0])
     elif foo=='append':
-        return len(agruments)>1 and evalAppend(agruments)
+    	agruments=transList(agruments)
+        return evalAppend(agruments)
     elif foo=='list?':
-           return len(agruments)==1 and isList(agruments[0])
+    	return isList(agruments.car())
     elif foo=='null?':
-        return len(agruments)==1 and agruments[0]==Pair.Nil
+        return agruments.car()==Pair.Nil
     elif foo=='symbol?':
-        return len(agruments)==1 and isQuoted(agruments[0])
+        return isQuoted(agruments.car())
     elif foo=='display':
-        display(agruments[0])
+        display(agruments.car())
     elif foo=='list-ref':
+    	agruments=transList(agruments)
         return listref(agruments[0],agruments[1])
     elif foo=='memq':
+    	agruments=transList(agruments)
         return evalmemq(agruments[0],agruments[1],mydict())
     elif foo=='assq':
+    	agruments=transList(agruments)
         return evalassq(agruments[0],agruments[1],mydict())
     elif foo=='pair?':
-        return len(agruments)==1 and agruments[0]!=Pair.Nil and isinstance(agruments[0],Pair)
+        return agruments.car()!=Pair.Nil and isinstance(agruments.car(),Pair)
     elif foo=='newline':
         print
     elif pattern.match(foo)!=None and foo==foo[pattern.match(foo).start():pattern.match(foo).end()]:
-        if not (isinstance(agruments[0],Pair) and len(agruments)==1):
-            raise SyntaxError("error parameters in %s"%(foo,))
-        return catch(foo[1:-1],agruments[0])
+        return catch(foo[1:-1],agruments.car())
     else:
         raise NameError("Doesn't exist or lock of implementation this primitive Object %s"%(foo,))
 
@@ -212,25 +205,8 @@ def isBaseFunctions(foo,env):
 
 def applyPrimitiveObject(body,env):
     foo=body[0]
-    parameters=map(lambda x:process(x,env),body[1:])
-    agruments=[]
-    for i in parameters:
-        if isinstance(i,int):
-            agruments.append(i)
-        elif isObject(i,env):
-            temp=env.findObject(i)
-            if isinstance(temp,list):
-                agruments.append(temp)
-            elif isnumber(temp):
-                agruments.append(transnumber(temp))
-            else:
-                agruments.append(temp)
-        elif isnumber(i):
-            agruments.append(transnumber(i))
-        elif isQuoted(i):
-            agruments.append(i[1:])
-        else:
-            agruments.append(i)
+    parameters=map(lambda x:transValue(process(x,env),env),body[1:])
+    agruments=List(parameters)
     return applyPrimitiveFunction(foo,agruments)
 
 def isMatch(para,agru):
@@ -270,13 +246,15 @@ def applyFunction(exp,env):
     return process(body,local_env)
 
 def isFunction(exp,env):
-    if exp[0]=='lambda':
-        return True
-    if exp[0]=='define' and isinstance(exp[1],list):
-        return True
-    if isinstance(env.findObject(exp[0]),tuple):
-        return True
-    return False
+	if isinstance(exp,tuple) and len(exp)==3:
+		return True
+	if exp[0]=='lambda':
+		return True
+	if exp[0]=='define' and isinstance(exp[1],list):
+		return True
+	if isinstance(env.findObject(exp[0]),tuple):
+		return True
+	return False
 
 def evalAnd(exp,env):
     temp=process(exp[0],env)
@@ -339,9 +317,19 @@ def evalLet(blinding,body,env):
         var.append(i[0])
         para.append(i[1])
     foo.append(var)
-    foo.append(body)
-    return process([foo]+para,env)
-    
+    temp=None
+    for i in body:
+    	temp=process([foo+[i]]+para,env)
+    return temp
+
+def evalMap(fun,lst,env):
+	lst=process(lst,env)
+	if isinstance(lst,Pair):
+		lst=transList(lst)
+	res=[]
+	for i in lst:
+		res.append(applyFunction([fun,i],env))
+	return List(res)
 
 def process(exp,env):
     if not isinstance(exp,list):
@@ -394,6 +382,8 @@ def process(exp,env):
         return transQuoted(exp[1])
     elif exp[0]=='apply':
         return applyFunction(exp[1:],env)
+    elif exp[0]=='map':
+    	return evalMap(exp[1],exp[2],env)
     elif exp[0]=='QUOTE':
         if len(exp)==1:
             return Pair.Nil

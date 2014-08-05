@@ -90,3 +90,21 @@ def display(val):
                 print '#f'
         else:
             print tostring(val)
+
+def transValue(i,env):
+    if isinstance(i,int):
+        return i
+    elif isObject(i,env):
+        temp=env.findObject(i)
+        if isinstance(temp,list):
+            return temp
+        elif isnumber(temp):
+            return transnumber(temp)
+        else:
+            return temp
+    elif isnumber(i):
+        return transnumber(i)
+    elif isQuoted(i):
+        return i[1:]
+    else:
+        return i
