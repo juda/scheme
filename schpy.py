@@ -48,7 +48,7 @@ def repl():
                     print "[error]%s"%(err,)
 
 def runFile():
-    sys.setrecursionlimit(10000)
+    sys.setrecursionlimit(100000)
     global_env=mydict()
     f=open(sys.argv[1])
     statement=''
