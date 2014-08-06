@@ -84,14 +84,14 @@ def showPair(exp):
 def display(val):
     if val is not None:
         if isinstance(val,Pair):
-            print '(%s)'%(showPair(val),)
+            print '(%s)'%(showPair(val),),
         elif isinstance(val,bool):
             if val==True:
-                print '#t'
+                print '#t',
             elif val==False:
-                print '#f'
+                print '#f',
         else:
-            print tostring(val)
+            print tostring(val),
 
 def transValue(i,env):
     if isinstance(i,int):

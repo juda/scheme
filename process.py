@@ -217,23 +217,20 @@ def isMatch(para,agru):
         return len(para)==len(agru)
 
 def applyFunction(exp,env):
-	if not isFunction(exp[0],env):
-		if isinstance(exp[0],list):
-			foo=process(exp[0],env)
-			if isBaseFunctions(foo,env):
-				temp=[foo]+exp[1:]
-				return applyPrimitiveObject(temp,env)
-		else:
-			if isBaseFunctions(exp[0],env):
-				return applyPrimitiveObject(exp,env)
-			else:
-				foo=env.findObject(exp[0])
-				if not isinstance(foo,tuple):
-					foo=process(foo,env)
-				if isinstance(foo,bool):
-					raise Exception("Can't find this object")
+	if isinstance(exp[0],list):
+		foo=process(exp[0],env)
+		if isBaseFunctions(foo,env):
+			temp=[foo]+exp[1:]
+			return applyPrimitiveObject(temp,env)
 	else:
-		foo=exp[0]
+		if isBaseFunctions(exp[0],env):
+			return applyPrimitiveObject(exp,env)
+		else:
+			foo=env.findObject(exp[0])
+			if not isinstance(foo,tuple):
+				foo=process(foo,env)
+			if isinstance(foo,bool):
+				raise Exception("Can't find this object")
 	if not isinstance(foo,tuple):
 		return foo
 	body,parameters,ENV=foo
@@ -253,8 +250,6 @@ def isFunction(exp,env):
 	if isinstance(exp,tuple) and len(exp)==3:
 		return True
 	if exp[0]=='lambda':
-		return True
-	if exp[0]=='define' and isinstance(exp[1],list):
 		return True
 	if isinstance(env.findObject(exp[0]),tuple):
 		return True
