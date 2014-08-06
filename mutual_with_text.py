@@ -70,6 +70,8 @@ def showPair(exp):
         return exp
     if isinstance(exp,list):
         return tostring(exp)
+    if isinstance(exp,tuple):
+        return exp
     if isinstance(exp.car(),Pair):
         res='(%s)'%(showPair(exp.car()),)
     else:

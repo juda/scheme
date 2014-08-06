@@ -217,34 +217,37 @@ def isMatch(para,agru):
         return len(para)==len(agru)
 
 def applyFunction(exp,env):
-    if isinstance(exp[0],list):
-        foo=process(exp[0],env)
-        if isBaseFunctions(foo,env):
-            temp=[foo]+exp[1:]
-            return applyPrimitiveObject(temp,env)
-    else:
-                if isBaseFunctions(exp[0],env):
-                    return applyPrimitiveObject(exp,env)
-                else:
-                    foo=env.findObject(exp[0])
-                    if not isinstance(foo,tuple):
-                        foo=process(foo,env)
-                    if isinstance(foo,bool):
-                        raise Exception("Can't find this object")
-    if not isinstance(foo,tuple):
-        return foo
-    body,parameters,ENV=foo
-    agruments=exp[1:]
-    local_env=mydict(ENV)
-    if not isinstance(exp[0],list):
-    	local_env.addObject(exp[0],makeObject(parameters,body,local_env))
-    temp=len(agruments)
-    for i in xrange(temp):
-        if parameters[i]=='.':            
-            local_env.addObject(parameters[i+1],List(map(lambda x:process(x,env),agruments[i:])))
-            break
-        local_env.addObject(parameters[i],process(agruments[i],env))
-    return process(body,local_env)
+	if not isFunction(exp[0],env):
+		if isinstance(exp[0],list):
+			foo=process(exp[0],env)
+			if isBaseFunctions(foo,env):
+				temp=[foo]+exp[1:]
+				return applyPrimitiveObject(temp,env)
+		else:
+			if isBaseFunctions(exp[0],env):
+				return applyPrimitiveObject(exp,env)
+			else:
+				foo=env.findObject(exp[0])
+				if not isinstance(foo,tuple):
+					foo=process(foo,env)
+				if isinstance(foo,bool):
+					raise Exception("Can't find this object")
+	else:
+		foo=exp[0]
+	if not isinstance(foo,tuple):
+		return foo
+	body,parameters,ENV=foo
+	agruments=exp[1:]
+	local_env=mydict(ENV)
+	if not isinstance(exp[0],list) and not isinstance(exp[0],tuple):
+		local_env.addObject(exp[0],makeObject(parameters,body,local_env))
+	temp=len(agruments)
+	for i in xrange(temp):
+		if parameters[i]=='.':            
+			local_env.addObject(parameters[i+1],List(map(lambda x:process(x,env),agruments[i:])))
+			break
+		local_env.addObject(parameters[i],process(agruments[i],env))
+	return process(body,local_env)
 
 def isFunction(exp,env):
 	if isinstance(exp,tuple) and len(exp)==3:
