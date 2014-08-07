@@ -236,8 +236,8 @@ def applyFunction(exp,env):
 	body,parameters,ENV=foo
 	agruments=exp[1:]
 	local_env=mydict(ENV)
-	if not isinstance(exp[0],list) and not isinstance(exp[0],tuple):
-		local_env.addObject(exp[0],makeObject(parameters,body,local_env))
+	#if not isinstance(exp[0],list) and not isinstance(exp[0],tuple):
+		#local_env.addObject(exp[0],makeObject(parameters,body,local_env))
 	temp=len(agruments)
 	for i in xrange(temp):
 		if parameters[i]=='.':            
@@ -336,7 +336,6 @@ def evalMap(fun,lst,env):
 
 
 def evalApply(fun,lst,env):
-	fun=process(fun,env)
 	lst=process(lst,env)
 	return applyFunction([fun]+transList(lst),env)
 

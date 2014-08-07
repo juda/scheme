@@ -13,7 +13,6 @@ def repl():
     global_env=mydict()
     sys.setrecursionlimit(10000)
     while True:
-        print
         statement=''
         isline=True
         while True:
@@ -28,6 +27,8 @@ def repl():
         statement=statement.split(';')[0]
         if statement=='exit':
             exit(0)
+        elif statement=='pdb':
+            pdb.set_trace()
         else:
             if statement[0]!='(':
                 if isnumber(statement):
@@ -40,10 +41,11 @@ def repl():
                     print tostring(statement)
             else:
                 try:
-                    pdb.set_trace()
                     temp=parse(statement)
                     val=process(temp,global_env)
-                    display(val)
+                    if val!=None:
+                        display(val)
+                        print
                 except Exception as err:
                     print "[error]%s"%(err,)
 
