@@ -10,8 +10,6 @@ import sys
 
 def repl():
     '''read-eval-print-loop'''
-    global_env=mydict()
-    sys.setrecursionlimit(10000)
     while True:
         statement=''
         isline=True
@@ -37,6 +35,7 @@ def repl():
                     print statement[1:]
                 elif global_env.findObject(statement):
                     display(global_env.findObject(statement))
+                    print
                 else:
                     print tostring(statement)
             else:
@@ -50,11 +49,8 @@ def repl():
                     print "[error]%s"%(err,)
 
 def runFile():
-    sys.setrecursionlimit(100000)
-    global_env=mydict()
     f=open(sys.argv[1])
     statement=''
-    #pdb.set_trace()
     for buff in f.xreadlines():
         statement+=buff.split(';')[0]
         statement=statement.strip()
@@ -64,16 +60,19 @@ def runFile():
             try:
                 val=process(parse(statement),global_env)
                 display(val)
-            except Exception as err:
+            except IOError as err:
                 print "[error]%s"%(err,)
             statement=''
         
 if __name__=="__main__":
+    global_env=mydict()
+    sys.setrecursionlimit(10000)
     if len(sys.argv)==1:
         print "[mode]shell"
         repl()
     elif len(sys.argv)==2:
         print "[mode]file"
         runFile()
+        repl()
     else:
         print "<usage> python schpy.py [file]"

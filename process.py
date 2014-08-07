@@ -46,21 +46,25 @@ def evalQuoted(exp,env):
         if isnumber(exp[i]):
             temp=transnumber(exp[i])
         elif isQuoted(exp[i]):
-            temp=transQuoted(exp[i])
+            temp=exp[i]
         elif isinstance(exp[i],list):
             temp=evalQuoted(exp[i],env)
-        else:
+        elif isstring(exp[i]):
             temp=exp[i]
+        elif exp[i].find('#\\')!=-1:
+            temp=exp[i]
+        else:
+            temp="'"+exp[i]
         res=cons(temp,res)
     return res
 
 def condIf(exp,env):
     for i in exp[1:]:
         if i[0]=='else':
-            return process(i[1],env)
+            return evalSequence(i[1:],env)
         else:
             if process(i[0],env):
-                return process(i[1],env)
+                return evalSequence(i[1:],env)
 
 def catch(command,alist):
     if command=='':
@@ -182,6 +186,10 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='memq':
     	agruments=transList(agruments)
         return evalmemq(agruments[0],agruments[1],mydict())
+    elif foo=='reverse':
+        temp=transList(agruments.car())
+        temp=temp[::-1]
+        return List(temp)
     elif foo=='assq':
     	agruments=transList(agruments)
         return evalassq(agruments[0],agruments[1],mydict())
@@ -206,7 +214,8 @@ def isBaseFunctions(foo,env):
 
 def applyPrimitiveObject(body,env):
     foo=body[0]
-    parameters=map(lambda x:transValue(process(x,env),env),body[1:])
+    parameters=map(lambda x:process(x,env),body[1:])
+    parameters=map(lambda x:transValue(x,env),parameters)
     agruments=List(parameters)
     return applyPrimitiveFunction(foo,agruments)
 
@@ -238,7 +247,7 @@ def applyFunction(exp,env):
 	local_env=mydict(ENV)
 	#if not isinstance(exp[0],list) and not isinstance(exp[0],tuple):
 		#local_env.addObject(exp[0],makeObject(parameters,body,local_env))
-	temp=len(agruments)
+	temp=len(parameters)
 	for i in xrange(temp):
 		if parameters[i]=='.':            
 			local_env.addObject(parameters[i+1],List(map(lambda x:process(x,env),agruments[i:])))
@@ -341,18 +350,7 @@ def evalApply(fun,lst,env):
 
 def process(exp,env):
     if not isinstance(exp,list):
-        if isinstance(exp,numbers.Number):
-            return exp
-        elif isnumber(exp):
-            return transnumber(exp)
-        elif isstring(exp):
-            return exp
-        elif isQuoted(exp):
-            return exp
-        elif env.findObject(exp)!=None:
-            return env.findObject(exp)
-        else:
-            return exp
+        return transValue(exp,env)
     if isinstance(exp[0],list) and not isFunction(exp[0],env):
         return evalSequence(exp,env)
     if exp[0]=='set!':

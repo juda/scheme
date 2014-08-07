@@ -6,7 +6,7 @@ from mutual_with_text import *
 import math
 
 class mydict:
-    BaseFunctions=('+','-','*','/','not','modulo','>','<','>=','<=',
+    BaseFunctions=('+','-','*','/','not','modulo','>','<','>=','<=','reverse',
                   '=','length','cons','list','number?','integer?','quotient',
                    'append','list?','null?','pair?','list-ref','memq','assq',
                   'symbol?','display','newline')

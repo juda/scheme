@@ -41,8 +41,8 @@ def isstring(exp):
 
 def transQuoted(exp):
     if isQuoted(exp):
-        return exp
-    return "'%s"%(exp,)
+        return exp[1:]
+    return exp
 
 def transnumber(number):
     if isinstance(number,numbers.Number):
@@ -94,7 +94,7 @@ def display(val):
             print tostring(val),
 
 def transValue(i,env):
-    if isinstance(i,int):
+    if isinstance(i,numbers.Number):
         return i
     elif isObject(i,env):
         temp=env.findObject(i)
@@ -107,6 +107,6 @@ def transValue(i,env):
     elif isnumber(i):
         return transnumber(i)
     elif isQuoted(i):
-        return i[1:]
+        return i
     else:
         return i
