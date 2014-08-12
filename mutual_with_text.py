@@ -1,6 +1,7 @@
 '''mutual with text'''
 import numbers
 from pair import *
+import sys
 
 def parentheseBalance(statement):
     res=0
@@ -27,7 +28,7 @@ def isnumber(number):
     return True
 
 def isQuoted(exp):
-    return isinstance(exp,str) and exp[0]=="'"
+    return isinstance(exp,str) and exp.find("'")==0
 
 def isObject(exp,env):
     try:
@@ -66,11 +67,13 @@ def showPair(exp):
         return transnumber(exp)
     if isQuoted(exp):
         return transQuoted(exp)
-    if isinstance(exp,str):
-        return exp
+    if isstring(exp):
+        return exp[1:-1]
     if isinstance(exp,list):
         return tostring(exp)
     if isinstance(exp,tuple):
+        return exp
+    if isinstance(exp,str):
         return exp
     if isinstance(exp.car(),Pair):
         res='(%s)'%(showPair(exp.car()),)
@@ -84,14 +87,18 @@ def showPair(exp):
 def display(val):
     if val is not None:
         if isinstance(val,Pair):
-            print '(%s)'%(showPair(val),),
+            sys.stdout.write('(%s)'%(showPair(val),))
         elif isinstance(val,bool):
             if val==True:
-                print '#t',
+                sys.stdout.write('#t')
             elif val==False:
-                print '#f',
+                sys.stdout.write('#f')
+        elif isstring(val):
+            sys.stdout.write(val[1:-1])
+        elif isQuoted(val):
+            sys.stdout.write(val[1:])
         else:
-            print tostring(val),
+            sys.stdout.write(tostring(val))
 
 def transValue(i,env):
     if isinstance(i,numbers.Number):
@@ -107,6 +114,8 @@ def transValue(i,env):
     elif isnumber(i):
         return transnumber(i)
     elif isQuoted(i):
+        return i
+    elif isstring(i):
         return i
     else:
         return i

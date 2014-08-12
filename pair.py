@@ -11,6 +11,12 @@ class Pair:
     def cdr(self):
         return self.y
 
+    def setcar(self,value):
+        self.x=value
+
+    def setcdr(self,value):
+        self.y=value
+
 Nil=Pair()
 
 def evalAppend(parameters):

@@ -25,8 +25,6 @@ def repl():
         statement=statement.split(';')[0]
         if statement=='exit':
             exit(0)
-        elif statement=='pdb':
-            pdb.set_trace()
         else:
             if statement[0]!='(':
                 if isnumber(statement):
@@ -66,7 +64,7 @@ def runFile():
         
 if __name__=="__main__":
     global_env=mydict()
-    sys.setrecursionlimit(10000)
+    sys.setrecursionlimit(100000000)
     if len(sys.argv)==1:
         print "[mode]shell"
         repl()

@@ -12,13 +12,9 @@ from pair import *
 def selfEvaluating(exp):
     return (isnumber(exp) or isQuoted(exp))
 
-def evalAssignment(exp,env):
-    env.setObject(exp[1],exp[2])
-
-
 def evalDefinition(exp,env):
     if len(exp)>3:
-        temp=exp[2:]
+        temp=['begin']+exp[2:]
     else:
         temp=exp[2]
     if isinstance(exp[1],list):        
@@ -101,6 +97,15 @@ def evalassq(obj,alist,env):
     temp=alist
     while temp!=Nil:
         if evalEqv(temp.car().car(),obj,env):
+            return temp.car()
+        else:
+            temp=temp.cdr()
+    return False
+
+def evalassoc(obj,alist,env):
+    temp=alist
+    while temp!=Nil:
+        if evalEqual(temp.car().car(),obj,env):
             return temp.car()
         else:
             temp=temp.cdr()
@@ -193,6 +198,9 @@ def applyPrimitiveFunction(foo,agruments):
     elif foo=='assq':
     	agruments=transList(agruments)
         return evalassq(agruments[0],agruments[1],mydict())
+    elif foo=='assoc':
+        agruments=transList(agruments)
+        return evalassoc(agruments[0],agruments[1],mydict())
     elif foo=='pair?':
         return agruments.car()!=Nil and isinstance(agruments.car(),Pair)
     elif foo=='newline':
@@ -325,10 +333,8 @@ def evalLet(blinding,body,env):
         var.append(i[0])
         para.append(i[1])
     foo.append(var)
-    temp=None
-    for i in body:
-    	temp=process([foo+[i]]+para,env)
-    return temp
+    temp=[foo+[['begin']+body]]+para
+    return process(temp,env)
 
 def evalMap(fun,lst,env):
 	lsts=[]
@@ -348,13 +354,28 @@ def evalApply(fun,lst,env):
 	lst=process(lst,env)
 	return applyFunction([fun]+transList(lst),env)
 
+def evalset(exp,env):
+    env.setObject(exp[1],process(exp[2],env))
+
+def evalsetcar(exp,env):
+    lst=process(exp[1],env)
+    lst.setcar(process(exp[2],env))
+
+def evalsetcdr(exp,env):
+    lst=process(exp[1],env)
+    lst.setcdr(process(exp[2],env))
+
 def process(exp,env):
     if not isinstance(exp,list):
         return transValue(exp,env)
     if isinstance(exp[0],list) and not isFunction(exp[0],env):
         return evalSequence(exp,env)
     if exp[0]=='set!':
-        evalAssignment(exp,env)
+        evalset(exp,env)
+    elif exp[0]=='set-car!':
+        evalsetcar(exp,env)
+    elif exp[0]=='set-cdr!':
+        evalsetcdr(exp,env)
     elif exp[0]=='define':
         evalDefinition(exp,env)
     elif exp[0]=='if':
